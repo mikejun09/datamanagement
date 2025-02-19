@@ -2,9 +2,6 @@
 
 @section('content')
     <div class="mt-5">
-
-        
-
         <h3>Select a Coordinator</h3>
         <form method="GET" action="{{ route('select-coordinator1') }}">
             <select class="form-select" name="coordinator_id" onchange="this.form.submit()">
@@ -50,10 +47,10 @@
 
                             <h6>Members:</h6>
                             <ul style="list-style-type: none; padding: 0;">
-                        @foreach($householdLeader->householdMembers as $index => $householdMember)
-                            <li>{{ $index + 1 }}. {{ $householdMember->voter->first_name }} {{ $householdMember->voter->last_name }}</li>
-                        @endforeach
-                    </ul>
+                    @foreach($householdLeader->householdMembers as $index => $householdMember)
+                        <li>{{ $index + 1 }}. {{ $householdMember->voter->first_name }} {{ $householdMember->voter->last_name }}</li>
+                    @endforeach
+                </ul>
 
 
                         </div>

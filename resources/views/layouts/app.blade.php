@@ -51,9 +51,7 @@
   <header id="header" class="header fixed-top d-flex align-items-center mb-5" style="height: 100px !important; ">
   
     <div class="d-flex align-items-center justify-content-between">
-      <a href="#" class="logo d-flex align-items-center mx-auto">
-          <img src="{{ asset('theme/img/logo.png') }}" class="img-fluid" alt="Logo">
-      </a>
+      <h1>DATA MANAGEMENT</h1>
   
       <i class="bi bi-list toggle-sidebar-btn"></i>
   </div>
