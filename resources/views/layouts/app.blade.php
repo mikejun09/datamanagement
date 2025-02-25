@@ -147,7 +147,14 @@
               <i class="bi bi-grid"></i>
               <span>Search Voters</span>
             </a>
-          </li>
+      </li>
+
+      <li class="nav-item">
+            <a class="nav-link {{ 'search' == request()->path() ? 'active' : '' }}" href="{{route('search')}} " href="{{route('search')}}">
+              <i class="bi bi-grid"></i>
+              <span>Create User</span>
+            </a>
+      </li>
 
     
     </ul>

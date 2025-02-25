@@ -17,6 +17,13 @@
     </div>
 
     @if(session('selected_coordinator'))
+        <a href="{{ route('reports.pdf') }}" class="btn btn-primary mt-3" target="_blank">
+            Print PDF
+        </a>
+    @endif
+
+
+    @if(session('selected_coordinator'))
     <div class="mt-5">
         <h3>
             Coordinator: 

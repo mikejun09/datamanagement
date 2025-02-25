@@ -78,7 +78,7 @@ Route::get('/search', [AdminController::class, 'search'])->name('search');
 Route::get('/generate-pdf', [ReportController::class, 'generatePDF'])->name('generate-pdf');
 Route::get('/preview-pdf', [ReportController::class, 'previewPDF'])->name('preview-pdf');
 
-
+Route::get('/reports/pdf', [ReportController::class, 'exportPDF'])->name('reports.pdf');
 
 
 });
@@ -86,6 +86,9 @@ Route::get('/preview-pdf', [ReportController::class, 'previewPDF'])->name('previ
 // 🟢 User Routes (Protected)
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+
+
+
 });
 
 // 🟢 Public Routes

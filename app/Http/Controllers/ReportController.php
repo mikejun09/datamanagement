@@ -66,4 +66,24 @@ class ReportController extends Controller
             }
 
 
+
+            public function exportPDF(Request $request)
+    {
+        // Get session data
+        $coordinator = session('selected_coordinator');
+        $purokLeaders = session('purokLeaders', collect());
+        $householdLeaders = session('householdLeaders', collect());
+
+        if (!$coordinator) {
+            return redirect()->back()->with('error', 'No coordinator selected for PDF.');
+        }
+
+        // Load the Blade template and pass data
+        $pdf = PDF::loadView('reports.pdf', compact('coordinator', 'purokLeaders', 'householdLeaders'));
+
+        return $pdf->stream('report.pdf'); // Display PDF in browser
+        // return $pdf->download('report.pdf'); // Uncomment this line to force download
+    }
+
+
 }
