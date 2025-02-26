@@ -133,7 +133,7 @@
 
 
       <li class="nav-item">
-            <a class="nav-link {{ 'search' == request()->path() ? 'active' : '' }}" href="{{route('search')}} " href="{{route('search')}}">
+            <a class="nav-link {{ 'user_search-leader' == request()->path() ? 'active' : '' }}" href="{{route('user_search-leader')}} " href="{{route('user_search-leader')}}">
               <i class="bi bi-grid"></i>
               <span>Search Voters</span>
             </a>
