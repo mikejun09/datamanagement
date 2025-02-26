@@ -11,6 +11,8 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UsersController;
+use App\Http\Controllers\UserTaggingController;
 
 // 🟢 Login Routes
 Route::get('/login', function () {
@@ -80,14 +82,46 @@ Route::get('/preview-pdf', [ReportController::class, 'previewPDF'])->name('previ
 
 Route::get('/reports/pdf', [ReportController::class, 'exportPDF'])->name('reports.pdf');
 
+// =============create user============
+
+Route::get('/create_user', [AdminController::class, 'create_user'])->name('create_user');
+Route::post('/add_user', [AdminController::class, 'store_user'])->name('add_user');
+
 
 });
 
 // 🟢 User Routes (Protected)
 Route::middleware(['auth', 'user'])->group(function () {
-    Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+   
+
+    Route::get('/user_voters', [UsersController::class, 'index'])->name('user_voters');
+    Route::post('/user_add-to-coordinator', [UserTaggingController::class, 'addToCoordinator'])->name('user_coordinator.add');
+    Route::delete('/user_coordinator/{id}', [UserTaggingController::class, 'destroy'])->name('user_deleteCoordinator');
 
 
+    // =======================purok leader=======================
+
+
+    Route::get('/user_purok_leader', [UsersController::class, 'purok_leader'])->name('user_purok_leader');
+    Route::post('/user-select-coordinator', [UserTaggingController::class, 'selectCoordinator'])->name('user_select.coordinator');
+    Route::delete('/user-purok-leader/{id}', [UserTaggingController::class, 'deletePurokLeader'])->name('user_deletePurokLeader');
+    Route::post('/user-purok-leader/store', [UserTaggingController::class, 'storePurokLeader'])->name('user_purok_leader.store');
+
+    // =========================household leader======================
+
+    Route::get('/user_household_leader', [UsersController::class, 'household_leader'])->name('user_household_leader');
+    Route::post('/user_select_purok_leader', [UserTaggingController::class, 'select_purok_leader'])->name('user_select_purok_leader');
+    Route::post('/user_storeHouseholdLeader', [UserTaggingController::class, 'storeHouseholdLeader'])->name('user_storeHouseholdLeader');
+    Route::delete('/user_voter/{id}', [UserTaggingController::class, 'user_destroy'])->name('user_voter.destroy');
+    Route::post('/user-tag-household-members', [UserTaggingController::class, 'tagHouseholdMembers'])->name('user_tagHouseholdMembers');
+
+
+    // =============================household member=======================
+
+    Route::get('/user_household_member', [UsersController::class, 'household_member'])->name('user_household_member');
+    Route::get('/user_search-leader', [UserTaggingController::class, 'searchLeader'])->name('user_search-leader');
+    Route::post('/user-select-leader', [UserTaggingController::class, 'selectLeader'])->name('user_select-leader');
+    Route::delete('/member-voter/{id}', [UserTaggingController::class, 'member_destroy'])->name('member_voter.destroy');
 
 });
 

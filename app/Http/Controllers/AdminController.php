@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\MasterList;
 use App\Models\Leaders;
 use App\Models\Barangay;
+use App\Models\User;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -64,5 +69,44 @@ public function search(Request $request)
 
     return view('admin.search', compact('voters' , 'barangays'));
 }
+
+public function create_user(Request $request){
+
+
+    return view('admin.create_user');
+}
+
+
+
+    public function store_user(Request $request)
+
+    {
+        
+
+        try {
+                $data = new User(); 
+                $data->name = $request->input('name');
+                $data->email = $request->input('email');
+               
+                $data->role = 'user';
+                $data->password =  Hash::make('password');
+               
+
+             
+                $data->save();
+
+            // Flash success message to the session
+            Session::flash('success', 'Data saved successfully!');
+        } catch (\Exception $e) {
+            // Handle any exceptions or errors
+            Session::flash('error', 'Data was saved but some field is missing. Please try again.');
+            Log::error('Error saving data: ' . $e->getMessage());
+        }
+
+        
+            return back();
+        
+        
+    }
 
 }

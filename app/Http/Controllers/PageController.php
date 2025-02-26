@@ -16,7 +16,7 @@ class PageController extends Controller
     {
         $purok_leaders = Masterlist::whereIn('id', PurokLeader::pluck('purok_leader_id'))->get();
         $householdLeaders = HouseholdLeader::with('purokLeader.coordinator.voter')->get();
-    
+        $potentialMembers = MasterList::with(['coordinator', 'purokLeader', 'householdLeader', 'householdMember'])->get();
         $barangays = Barangay::all();
     
             $barangay = $request->input('barangay');
@@ -34,6 +34,11 @@ class PageController extends Controller
                     return $query->where('last_name', 'like', "%{$last_name}%");
                 })
                 ->get();
+
+                session([
+                    'potentialMembers' => $potentialMembers,
+                    'session_expires_at' => now()->addMinutes(30),
+                ]);
        
         // Pass the voters to the view
         return view('admin.tagging_household_leader', compact('voters', 'purok_leaders' , 'barangays' , 'householdLeaders'));

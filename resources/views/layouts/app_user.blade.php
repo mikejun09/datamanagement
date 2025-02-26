@@ -94,12 +94,7 @@
 
     <ul class="sidebar-nav" id="sidebar-nav">
   
-        <li class="nav-item">
-            <a class="nav-link {{ 'admin_index' == request()->path() ? 'active' : '' }}" href="{{route('admin_index')}} " href="{{route('admin_index')}}">
-              <i class="bi bi-grid"></i>
-              <span>Dashboard</span>
-            </a>
-          </li>
+     
 
           <li class="nav-item">
             <a class="nav-link" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
@@ -107,25 +102,26 @@
             </a>
             <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
               <li>
-                <a class="nav-link {{ request()->is('voters') ? 'active' : '' }}" href="{{ route('voters.index') }}">
-                  <i class="bi bi-chevron-double-right"></i>Tagging Barangay Coordinator
-              </a>
+              <a class="nav-link {{ 'user_voters' == request()->path() ? 'active' : '' }}" href="{{route('user_voters')}} " href="{{route('user_voters')}}">
+                  <i class="bi bi-chevron-double-right"></i><span>Tagging Barangay Coordinator</span>
+                </a>
+
               
               </li>
               <li class="mt-1">
-                <a class="nav-link {{ 'purok_leader' == request()->path() ? 'active' : '' }}" href="{{route('purok_leader')}} " href="{{route('purok_leader')}}">
+                <a class="nav-link {{ 'user_purok_leader' == request()->path() ? 'active' : '' }}" href="{{route('user_purok_leader')}} " href="{{route('user_purok_leader')}}">
                   <i class="bi bi-chevron-double-right"></i><span>Tagging Barangay Purok Leader</span>
                 </a>
               </li>
 
               <li class="mt-1">
-                <a class="nav-link {{ 'household_leader' == request()->path() ? 'active' : '' }}" href="{{route('household_leader')}} " href="{{route('household_leader')}}">
+                <a class="nav-link {{ 'user_household_leader' == request()->path() ? 'active' : '' }}" href="{{route('user_household_leader')}} " href="{{route('user_household_leader')}}">
                   <i class="bi bi-chevron-double-right"></i><span>Tagging Household Leader</span>
                 </a>
               </li>
 
               <li class="mt-1">
-                <a class="nav-link {{ 'household_member' == request()->path() ? 'active' : '' }}" href="{{route('household_member')}} " href="{{route('household_member')}}">
+                <a class="nav-link {{ 'user_household_member' == request()->path() ? 'active' : '' }}" href="{{route('user_household_member')}} " href="{{route('user_household_member')}}">
                   <i class="bi bi-chevron-double-right"></i><span>Tagging Household Member</span>
                 </a>
               </li>
@@ -135,12 +131,6 @@
 
     
 
-      <li class="nav-item">
-        <a class="nav-link {{ 'reports' == request()->path() ? 'active' : '' }}" href="{{route('reports')}} " href="{{route('reports')}}">
-          <i class="bi bi-layout-text-window-reverse"></i>
-          <span>Reports</span>
-        </a>
-      </li>
 
       <li class="nav-item">
             <a class="nav-link {{ 'search' == request()->path() ? 'active' : '' }}" href="{{route('search')}} " href="{{route('search')}}">
@@ -149,12 +139,7 @@
             </a>
       </li>
 
-      <li class="nav-item">
-            <a class="nav-link {{ 'create_user' == request()->path() ? 'active' : '' }}" href="{{route('create_user')}} " href="{{route('create_user')}}">
-              <i class="bi bi-grid"></i>
-              <span>Create User</span>
-            </a>
-      </li>
+   
 
     
     </ul>

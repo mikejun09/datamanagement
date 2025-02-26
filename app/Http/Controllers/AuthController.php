@@ -20,7 +20,7 @@ class AuthController extends Controller
             if ($user->isAdmin()) {
                 return redirect()->route('admin_index');
             } else {
-                return redirect()->route('user.dashboard');
+                return redirect()->route('user_voters');
             }
         }
 
