@@ -122,7 +122,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/user_search-leader', [UserTaggingController::class, 'searchLeader'])->name('user_search-leader');
     Route::post('/user-select-leader', [UserTaggingController::class, 'selectLeader'])->name('user_select-leader');
     Route::delete('/member-voter/{id}', [UserTaggingController::class, 'member_destroy'])->name('member_voter.destroy');
-
+    Route::get('/user_searchvoter', [AdminController::class, 'search'])->name('user_searchvoter');
+    Route::get('/search_voter', [UsersController::class, 'search_voter'])->name('search_voter');
 });
 
 // 🟢 Public Routes
