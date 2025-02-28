@@ -148,7 +148,10 @@
             </tbody>
         </table>
 
-    
+        <!-- Pagination Links -->
+        <div class="pagination-wrapper">
+            {{ $voters->links() }}
+        </div>
     </div>
 @endif
 
