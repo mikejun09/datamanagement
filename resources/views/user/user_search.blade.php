@@ -53,6 +53,12 @@
     @if ($voters->isEmpty())
         <tr>
             <td colspan="7" class="text-center">Please enter search criteria to display results.</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     @else
         @foreach($voters as $voter)
