@@ -15,7 +15,7 @@ class TaggingController extends Controller
     public function index(Request $request)
 {   
     $barangays = Barangay::all();
-    $coordinator_lists = Coordinator::with('voter')->paginate(5);
+    $coordinator_lists = Coordinator::with('voter');
 
     // Get search inputs
     $barangay = $request->input('barangay');
