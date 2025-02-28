@@ -15,34 +15,45 @@ use Illuminate\Support\Facades\Log;
 class AdminController extends Controller
 {
     public function index(Request $request)
-{
-    // Fetch all voters
-    $voters = MasterList::all();
+    {
+        // Fetch all barangays (unchanged)
+        $barangays = Barangay::all()->map(function ($barangay) {
+            $taggedVotersCount = MasterList::where('barangay', $barangay->barangay)
+                ->whereHas('coordinator')->count() + 
+                MasterList::where('barangay', $barangay->barangay)
+                ->whereHas('purokLeader')->count() +
+                MasterList::where('barangay', $barangay->barangay)
+                ->whereHas('householdLeader')->count() + 
+                MasterList::where('barangay', $barangay->barangay)
+                ->whereHas('householdMember')->count();
     
-    // Fetch all barangays with the count of tagged voters
-    $barangays = Barangay::all()->map(function ($barangay) {
-        // Count tagged voters in each barangay (Coordinators, Purok Leaders, Household Leaders, Household Members)
-        $taggedVotersCount = MasterList::where('barangay', $barangay->barangay)
-            ->whereHas('coordinator')
-            ->count() + 
-            MasterList::where('barangay', $barangay->barangay)
-            ->whereHas('purokLeader')
-            ->count() +
-            MasterList::where('barangay', $barangay->barangay)
-            ->whereHas('householdLeader')
-            ->count() + 
-            MasterList::where('barangay', $barangay->barangay)
-            ->whereHas('householdMember')
-            ->count();
-        
-        // Add the tagged voters count to the barangay object
-        $barangay->tagged_voters_count = $taggedVotersCount;
-
-        return $barangay;
-    });
-
-    return view('admin.index', compact('voters', 'barangays'));
-}
+            $barangay->tagged_voters_count = $taggedVotersCount;
+            return $barangay;
+        });
+    
+        // Only fetch voters if a search filter is provided
+        $query = MasterList::query();
+    
+        if ($request->filled('last_name')) {
+            $query->where('last_name', 'LIKE', '%' . $request->last_name . '%');
+        }
+    
+        if ($request->filled('first_name')) {
+            $query->where('first_name', 'LIKE', '%' . $request->first_name . '%');
+        }
+    
+        if ($request->filled('barangay')) {
+            $query->where('barangay', $request->barangay);
+        }
+    
+        // Only retrieve voters if a search was performed
+        $voters = ($request->filled('last_name') || $request->filled('first_name') || $request->filled('barangay')) 
+            ? $query->paginate(10) 
+            : collect(); // Empty collection when no search is done
+    
+        return view('admin.index', compact('voters', 'barangays'));
+    }
+    
 
 public function search(Request $request)
 {
