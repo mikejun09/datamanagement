@@ -136,7 +136,7 @@
                             @endif
                         </td>
                         <td>
-                            <form action="{{ route('coordinator.add') }}" method="POST">
+                            <form action="{{ route('user_coordinator.add') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="voter_id" value="{{ $voter->id }}">
                                 <button type="submit" class="btn btn-primary">
