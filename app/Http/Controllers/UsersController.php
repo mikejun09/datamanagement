@@ -14,25 +14,27 @@ class UsersController extends Controller
 {
     public function index(Request $request)
     {   
-        $barangays = Barangay::all();
-        $coordinator_lists = Coordinator::with('voter')->paginate(5);
+        
+    $barangays = Barangay::all();
+    $coordinator_lists = Coordinator::with('voter')->paginate(5);
 
+    // Get search inputs
+    $barangay = $request->input('barangay');
+    $first_name = $request->input('first_name');
+    $last_name = $request->input('last_name');
 
-        $barangay = $request->input('barangay');
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
+    // Only fetch voters if a search was performed
+    $voters = MasterList::query();
 
-        // Default: Select all voters if no search query is provided
-        $voters = MasterList::when($barangay, function ($query, $barangay) {
-                return $query->where('barangay', 'like', "%{$barangay}%");
-            })
-            ->when($first_name, function ($query, $first_name) {
-                return $query->where('first_name', 'like', "%{$first_name}%");
-            })
-            ->when($last_name, function ($query, $last_name) {
-                return $query->where('last_name', 'like', "%{$last_name}%");
-            })
+    if ($barangay || $first_name || $last_name) {
+        $voters = $voters
+            ->when($barangay, fn($query) => $query->where('barangay', 'like', "%{$barangay}%"))
+            ->when($first_name, fn($query) => $query->where('first_name', 'like', "%{$first_name}%"))
+            ->when($last_name, fn($query) => $query->where('last_name', 'like', "%{$last_name}%"))
             ->get();
+    } else {
+        $voters = collect(); // Return an empty collection if no search
+    }
 
         return view('user.user_tagging_coordinator', compact('voters' , 'barangays', 'coordinator_lists'));    
 

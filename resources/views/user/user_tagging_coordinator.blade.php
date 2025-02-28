@@ -96,60 +96,61 @@
     </div>
 @endif
 
-<div class="row mt-5 mb-5">
-    <table class="table table-hover table-bordered table-striped" id="example">
-        <thead>
-            <tr>
-                
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Address</th>
-                <th>Barangay</th>
-                <th>Precinct</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($voters as $voter)
+@if ($voters->isEmpty() && !request()->filled('barangay') && !request()->filled('first_name') && !request()->filled('last_name'))
+    <div class="alert alert-info text-center">No data to display. Please use the search filters above.</div>
+@else
+    <div class="row mt-5 mb-5">
+        <table class="table table-hover table-bordered table-striped" id="example">
+            <thead>
                 <tr>
-                    <td>{{ $voter->last_name }}</td>
-                    <td>{{ $voter->first_name }}</td>
-                    <td>{{ $voter->middle_name }}</td>
-                    <td>{{ $voter->address }}</td>
-                    <td>{{ $voter->barangay }}</td>
-                    <td>{{ $voter->precinct }}</td>
-                    <td>  
-                        @if($voter->coordinator)
-                            BC
-                        @elseif($voter->purokLeader)
-                            PL
-                        @elseif($voter->householdLeader)
-                            HL
-                        @elseif($voter->householdMember)  
-                            HM
-                        @else
-                            &nbsp;  <!-- Empty space for not tagged voters -->
-                        @endif
-                    </td>
-                    
-                    
-                    <td>
-                        <form action="{{ route('user_coordinator.add') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="voter_id" value="{{ $voter->id }}">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-person-plus-fill"></i> Add to Coordinator
-                            </button>
-                        </form>
-                    </td>
-                    
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Address</th>
+                    <th>Barangay</th>
+                    <th>Precinct</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach($voters as $voter)
+                    <tr>
+                        <td>{{ $voter->last_name }}</td>
+                        <td>{{ $voter->first_name }}</td>
+                        <td>{{ $voter->middle_name }}</td>
+                        <td>{{ $voter->address }}</td>
+                        <td>{{ $voter->barangay }}</td>
+                        <td>{{ $voter->precinct }}</td>
+                        <td>  
+                            @if($voter->coordinator)
+                                BC
+                            @elseif($voter->purokLeader)
+                                PL
+                            @elseif($voter->householdLeader)
+                                HL
+                            @elseif($voter->householdMember)  
+                                HM
+                            @else
+                                &nbsp;  <!-- Empty space for not tagged voters -->
+                            @endif
+                        </td>
+                        <td>
+                            <form action="{{ route('coordinator.add') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="voter_id" value="{{ $voter->id }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-person-plus-fill"></i> Add to Coordinator
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endif
+
 
 
 <!-- Coordinator Exists Modal -->
