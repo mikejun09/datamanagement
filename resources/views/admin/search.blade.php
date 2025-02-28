@@ -50,36 +50,42 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($voters as $voter)
-                    <tr>
-                        <td>{{ $voter->last_name }}</td>
-                        <td>{{ $voter->first_name }}</td>
-                        <td>{{ $voter->middle_name }}</td>
-                        <td>{{ $voter->address }}</td>
-                        <td>{{ $voter->barangay }}</td>
-                        <td>{{ $voter->precinct }}</td>
-
-                        <td>
-                            @if($voter->coordinator)
+    @if ($voters->isEmpty())
+        <tr>
+            <td colspan="7" class="text-center">Please enter search criteria to display results.</td>
+            <td style="display: none;"></td>
+            <td style="display: none;"></td>
+            <td style="display: none;"></td>
+            <td style="display: none;"></td>
+            <td style="display: none;"></td>
+            <td style="display: none;"></td>
+        </tr>
+    @else
+        @foreach($voters as $voter)
+            <tr>
+                <td>{{ $voter->last_name }}</td>
+                <td>{{ $voter->first_name }}</td>
+                <td>{{ $voter->middle_name }}</td>
+                <td>{{ $voter->address }}</td>
+                <td>{{ $voter->barangay }}</td>
+                <td>{{ $voter->precinct }}</td>
+                <td>
+                    @if($voter->coordinator)
                         Barangay Coordinator
                     @elseif($voter->purokLeader)
-                    Purok Leader under Barangay Coordinator: {{ $voter->purokLeader->coordinator->voter->first_name }} {{ $voter->purokLeader->coordinator->voter->last_name }}
+                        Purok Leader under Barangay Coordinator: {{ $voter->purokLeader->coordinator->voter->first_name }} {{ $voter->purokLeader->coordinator->voter->last_name }}
                     @elseif($voter->householdLeader && $voter->householdLeader->purokLeader)
-                Household Leader under Purok Leader: 
-                {{ $voter->householdLeader->purokLeader->voter->first_name }} 
-                {{ $voter->householdLeader->purokLeader->voter->last_name }}
+                        Household Leader under Purok Leader: {{ $voter->householdLeader->purokLeader->voter->first_name }} {{ $voter->householdLeader->purokLeader->voter->last_name }}
                     @elseif($voter->householdMember)  
-                    Household Member under Household Leader: 
-                {{ $voter->householdMember->householdLeader->voter->first_name }} 
-                {{ $voter->householdMember->householdLeader->voter->last_name }}
+                        Household Member under Household Leader: {{ $voter->householdMember->householdLeader->voter->first_name }} {{ $voter->householdMember->householdLeader->voter->last_name }}
                     @else
                         &nbsp;  <!-- Empty space for not tagged voters -->
                     @endif
-                        </td>
-                        
-                    </tr>
-                @endforeach
-            </tbody>
+                </td>
+            </tr>
+        @endforeach
+    @endif
+</tbody>
         </table>
     </div>
 
