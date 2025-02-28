@@ -138,21 +138,25 @@
     </div>
 @endif
 
-
-    <table class="table table-hover table-bordered table-striped" id="example">
-        <thead>
+<table class="table table-hover table-bordered table-striped" id="example">
+    <thead>
+        <tr>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Middle Name</th>
+            <th>Address</th>
+            <th>Barangay</th>
+            <th>Precinct</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if($voters->isEmpty())
             <tr>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Address</th>
-                <th>Barangay</th>
-                <th>Precinct</th>
-                <th>Status</th>
-                <th>Action</th>
+                <td colspan="8" class="text-center">Please enter search criteria to display results.</td>
             </tr>
-        </thead>
-        <tbody>
+        @else
             @foreach($voters as $voter)
                 <tr>
                     <td>{{ $voter->last_name }}</td>
@@ -161,18 +165,19 @@
                     <td>{{ $voter->address }}</td>
                     <td>{{ $voter->barangay }}</td>
                     <td>{{ $voter->precinct }}</td>
-                    <td>  @if($voter->coordinator)
-                        BC
-                    @elseif($voter->purokLeader)
-                        PL
-                    @elseif($voter->householdLeader)
-                        HL
-                    @elseif($voter->householdMember)  
-                        HM
-                    @else
-                        &nbsp;  <!-- Empty space for not tagged voters -->
-                    @endif
-                </td>
+                    <td>
+                        @if($voter->coordinator)
+                            BC
+                        @elseif($voter->purokLeader)
+                            PL
+                        @elseif($voter->householdLeader)
+                            HL
+                        @elseif($voter->householdMember)  
+                            HM
+                        @else
+                            &nbsp;
+                        @endif
+                    </td>
                     <td>
                         @if(session('selected_coordinator'))
                             <form action="{{ route('purok_leader.store') }}" method="POST">
@@ -189,11 +194,10 @@
                     </td>
                 </tr>
             @endforeach
-        </tbody>
-    </table>
-    {{-- <div>
-        {{ $voters->links() }}
-    </div> --}}
+        @endif
+    </tbody>
+</table>
+
 </div>
 
 <script>
