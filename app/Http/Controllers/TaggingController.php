@@ -13,28 +13,30 @@ use App\Models\HouseholdMember;
 class TaggingController extends Controller
 {
     public function index(Request $request)
-    {   
-        $barangays = Barangay::all();
-        $coordinator_lists = Coordinator::with('voter')->get(); // Get all coordinators (since no pagination is needed)
-    
-        // Get search inputs
-        $barangay = $request->input('barangay');
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
-    
-        // Only fetch voters if a search was performed
-        $voters = collect(); // Default empty collection
-    
-        if ($barangay || $first_name || $last_name) {
-            $voters = MasterList::when($barangay, fn($query) => $query->where('barangay', 'like', "%{$barangay}%"))
-                ->when($first_name, fn($query) => $query->where('first_name', 'like', "%{$first_name}%"))
-                ->when($last_name, fn($query) => $query->where('last_name', 'like', "%{$last_name}%"))
-                ->get(); // Get all results (DataTables will handle pagination)
-        }
-    
-        return view('admin.tagging_coordinator', compact('voters', 'barangays', 'coordinator_lists'));
+{   
+    $barangays = Barangay::all();
+    $coordinator_lists = Coordinator::with('voter')->paginate(5);
+
+    // Get search inputs
+    $barangay = $request->input('barangay');
+    $first_name = $request->input('first_name');
+    $last_name = $request->input('last_name');
+
+    // Only fetch voters if a search was performed
+    $voters = MasterList::query();
+
+    if ($barangay || $first_name || $last_name) {
+        $voters = $voters
+            ->when($barangay, fn($query) => $query->where('barangay', 'like', "%{$barangay}%"))
+            ->when($first_name, fn($query) => $query->where('first_name', 'like', "%{$first_name}%"))
+            ->when($last_name, fn($query) => $query->where('last_name', 'like', "%{$last_name}%"))
+            ->get();
+    } else {
+        $voters = collect(); // Return an empty collection if no search
     }
-    
+
+    return view('admin.tagging_coordinator', compact('voters', 'barangays', 'coordinator_lists'));
+}
 
 
 
