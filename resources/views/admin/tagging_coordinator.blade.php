@@ -95,7 +95,7 @@
         {{ session('success') }}
     </div>
 @endif
-@if ($voters->isEmpty() && !request()->filled('last_name') && !request()->filled('first_name') && !request()->filled('barangay'))
+@if ($voters->isEmpty() && !request()->filled('barangay') && !request()->filled('first_name') && !request()->filled('last_name'))
     <div class="alert alert-info text-center">No data to display. Please use the search filters above.</div>
 @else
     <div class="row mt-5 mb-5">
@@ -147,8 +147,14 @@
                 @endforeach
             </tbody>
         </table>
+
+        <!-- Pagination Links -->
+        <div class="pagination-wrapper">
+            {{ $voters->links() }}
+        </div>
     </div>
 @endif
+
 
 
 <!-- Coordinator Exists Modal -->
