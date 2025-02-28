@@ -45,14 +45,15 @@ class UsersController extends Controller
 {
     $coordinators = Masterlist::whereIn('id', Coordinator::pluck('coordinator_id'))->get();
     $purokLeaders = PurokLeader::with(['voter', 'coordinator.voter'])->get();
-
     $barangays = Barangay::all();
 
-        $barangay = $request->input('barangay');
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
+    $barangay = $request->input('barangay');
+    $first_name = $request->input('first_name');
+    $last_name = $request->input('last_name');
 
-        // Default: Select all voters if no search query is provided
+    // Do not fetch voters unless search criteria are provided
+    $voters = collect(); // Empty collection by default
+    if ($barangay || $first_name || $last_name) {
         $voters = MasterList::when($barangay, function ($query, $barangay) {
                 return $query->where('barangay', 'like', "%{$barangay}%");
             })
@@ -63,6 +64,7 @@ class UsersController extends Controller
                 return $query->where('last_name', 'like', "%{$last_name}%");
             })
             ->get();
+    }
    
     // Pass the voters to the view
     return view('user.user_tagging_purok_leader', compact('voters', 'coordinators' , 'barangays', 'purokLeaders'));
