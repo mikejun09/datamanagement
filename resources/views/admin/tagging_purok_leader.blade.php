@@ -162,7 +162,7 @@
                 <td style="display:none;"></td>
                 <td style="display:none;"></td>
                 <td style="display:none;"></td>
-                <td style="display:none;"></td>
+                
             </tr>
         @else
             @foreach($voters as $voter)
