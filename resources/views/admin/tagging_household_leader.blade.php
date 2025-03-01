@@ -61,8 +61,10 @@
 
 
 {{-- ========================================================================================== --}}
+
 <div class="mt-5 col-md-12">
     <form method="GET" action="{{ route('household_leader') }}">
+
         <div class="d-flex mb-2">
             <div class="col-md-4 me-2">
                 <select class="form-select" name="barangay" id="barangay">
@@ -74,95 +76,46 @@
                     @endforeach
                 </select>
             </div>
-
+    
             <div class="col me-2">
                 <input type="text" name="last_name" class="form-control" placeholder="Last Name" value="{{ request('last_name') }}">
             </div>
-
+    
             <div class="col me-2">
                 <input type="text" name="first_name" class="form-control" placeholder="First Name" value="{{ request('first_name') }}">
             </div>
-
+    
             <div>
                 <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </div>
+    
     </form>
+    
+    
 </div>
+
+
 
 <div class="row mt-5 mb-5">
     <h3>Tag a Household Leader</h3>
 
+
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 
-    <table class="table table-hover table-bordered table-striped" id="example">
-        <thead>
-            <tr>
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Address</th>
-                <th>Barangay</th>
-                <th>Precinct</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if(request('last_name') || request('first_name'))
-                @if($voters->isEmpty())
-                    <tr>
-                        <td colspan="8" class="text-center">No voters found.</td>
-                    </tr>
-                @else
-                    @foreach($voters as $voter)
-                        <tr>
-                            <td>{{ $voter->last_name }}</td>
-                            <td>{{ $voter->first_name }}</td>
-                            <td>{{ $voter->middle_name }}</td>
-                            <td>{{ $voter->address }}</td>
-                            <td>{{ $voter->barangay }}</td>
-                            <td>{{ $voter->precinct }}</td>
-                            <td>
-                                @if($voter->coordinator) BC
-                                @elseif($voter->purokLeader) PL
-                                @elseif($voter->householdLeader) HL
-                                @elseif($voter->householdMember) HM
-                                @else &nbsp;
-                                @endif
-                            </td>
-                            <td>
-                                @if(session('selected_purok_leader'))
-                                    <form action="{{ route('storeHouseholdLeader') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="voter_id" value="{{ $voter->id }}">
-                                        <input type="hidden" name="purok_leader_id" value="{{ session('selected_purok_leader')->id }}">
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="bi bi-person-plus-fill"></i> Add as Household Leader
-                                        </button>
-                                    </form>
-                                @else
-                                    <button class="btn btn-secondary" disabled>Select a Purok Leader First</button>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                @endif
-            @else
-                <tr>
-                    <td colspan="8" class="text-center">Search for a voter to display results.</td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
+
+    
 </div>
-
 
 
 {{-- =======================show tagged members================================= --}}
@@ -256,7 +209,65 @@
 
 
 
-
+<!-- Bootstrap Extra Large Modal -->
+<div class="modal fade" id="householdLeaderModal" tabindex="-1" aria-labelledby="householdLeaderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tag Members <span id="leaderName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="tagMembersForm" action="{{ route('tagHouseholdMembers') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="household_leader_id" id="household_leader_id">
+                    <table id="membersTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="checkAll"></th>
+                                <th>Last Name</th>
+                                <th>First Name</th>
+                                <th>Middle Name</th>
+                                <th>Address</th>
+                                <th>Barangay</th>
+                                <th>Precinct</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(session('potentialMembers', []) as $member)
+                            <tr>
+                                <td><input type="checkbox" name="members[]" value="{{ $member->id }}"></td>
+                                <td>{{ $member->last_name }}</td>
+                                <td>{{ $member->first_name }}</td>
+                                <td>{{ $member->middle_name }}</td>
+                                <td>{{ $member->address }}</td>
+                                <td>{{ $member->barangay }}</td>
+                                <td>{{ $member->precinct }}</td>
+                                <td>  @if($member->coordinator)
+                                    BC
+                                @elseif($member->purokLeader)
+                                    PL
+                                @elseif($member->householdLeader)
+                                    HL
+                                @elseif($member->householdMember)  
+                                    HM
+                                @else
+                                    &nbsp;  <!-- Empty space for not tagged voters -->
+                                @endif
+                            </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Tag Selected Members</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

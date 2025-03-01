@@ -89,15 +89,14 @@ public function purok_leader(Request $request)
 {
     $coordinators = Masterlist::whereIn('id', Coordinator::pluck('coordinator_id'))->get();
     $purokLeaders = PurokLeader::with(['voter', 'coordinator.voter'])->get();
+
     $barangays = Barangay::all();
 
-    $barangay = $request->input('barangay');
-    $first_name = $request->input('first_name');
-    $last_name = $request->input('last_name');
+        $barangay = $request->input('barangay');
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
 
-    // Do not fetch voters unless search criteria are provided
-    $voters = collect(); // Empty collection by default
-    if ($barangay || $first_name || $last_name) {
+        // Default: Select all voters if no search query is provided
         $voters = MasterList::when($barangay, function ($query, $barangay) {
                 return $query->where('barangay', 'like', "%{$barangay}%");
             })
@@ -108,11 +107,10 @@ public function purok_leader(Request $request)
                 return $query->where('last_name', 'like', "%{$last_name}%");
             })
             ->get();
-    }
-
-    return view('admin.tagging_purok_leader', compact('voters', 'coordinators', 'barangays', 'purokLeaders'));
+   
+    // Pass the voters to the view
+    return view('admin.tagging_purok_leader', compact('voters', 'coordinators' , 'barangays', 'purokLeaders'));
 }
-
 
 
 
@@ -197,7 +195,7 @@ public function select_purok_leader(Request $request)
     // If ID is missing, try to find it by name
     if (!$purok_leader_id) {
         $purok_leader = PurokLeader::whereHas('voter', function ($query) use ($request) {
-            $query->whereRaw("CONCAT(first_name, ' ', last_name) = ?", [$request->purok_leader_name]);
+            $query->whereRaw("LOWER(CONCAT(first_name, ' ', last_name)) = LOWER(?)", [$request->purok_leader_name]);
         })->first();
 
         if ($purok_leader) {
