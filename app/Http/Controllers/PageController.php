@@ -14,19 +14,16 @@ class PageController extends Controller
 {
    
     public function household_leader(Request $request)
-{
-    $purok_leaders = Masterlist::whereIn('id', PurokLeader::pluck('purok_leader_id'))->get();
-    $householdLeaders = HouseholdLeader::with('purokLeader.coordinator.voter')->get();
-    $barangays = Barangay::all();
-    $potentialMembers = MasterList::with(['coordinator', 'purokLeader', 'householdLeader', 'householdMember'])->get();
-
-    $barangay = $request->input('barangay');
-    $first_name = $request->input('first_name');
-    $last_name = $request->input('last_name');
-
-    // Fetch only if search criteria is provided, otherwise return an empty collection
-    $voters = collect(); // Default: empty collection
-    if ($barangay || $first_name || $last_name) {
+    {
+        $purok_leaders = MasterList::whereIn('id', PurokLeader::pluck('purok_leader_id'))->get();
+        $householdLeaders = HouseholdLeader::with('voter', 'purokLeader', 'purokLeader.coordinator')->get();
+        $barangays = Barangay::all();
+    
+        $barangay = $request->input('barangay');
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
+    
+        // Fetch voters based on search criteria
         $voters = MasterList::when($barangay, function ($query, $barangay) {
                 return $query->where('barangay', 'like', "%{$barangay}%");
             })
@@ -37,14 +34,10 @@ class PageController extends Controller
                 return $query->where('last_name', 'like', "%{$last_name}%");
             })
             ->get();
+       
+        return view('admin.tagging_household_leader', compact('voters', 'purok_leaders', 'barangays', 'householdLeaders'));
     }
-    session([
-        'potentialMembers' => $potentialMembers,
-        'session_expires_at' => now()->addMinutes(30),
-    ]);
-
-    return view('admin.tagging_household_leader', compact('voters', 'purok_leaders', 'barangays', 'householdLeaders'));
-}
+    
 
    
 
