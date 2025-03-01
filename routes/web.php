@@ -88,6 +88,11 @@ Route::get('/create_user', [AdminController::class, 'create_user'])->name('creat
 Route::post('/add_user', [AdminController::class, 'store_user'])->name('add_user');
 
 
+Route::get('/searchHouseholdMembers', [PageController::class, 'searchHouseholdMembers'])->name('searchHouseholdMembers');
+
+
+
+
 });
 
 // 🟢 User Routes (Protected)

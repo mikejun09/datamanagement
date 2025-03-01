@@ -287,6 +287,31 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+
+                <!-- Search Form -->
+                <form id="searchMembersForm">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="last_name" placeholder="Last Name">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="first_name" placeholder="First Name">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="barangay">
+                                <option value="">All Barangay</option>
+                                @foreach ($barangays as $barangay)
+                                    <option value="{{ $barangay->barangay }}">{{ $barangay->barangay }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Members Table -->
                 <form id="tagMembersForm" action="{{ route('tagHouseholdMembers') }}" method="POST">
                     @csrf
                     <input type="hidden" name="household_leader_id" id="household_leader_id">
@@ -303,30 +328,10 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach(session('potentialMembers', []) as $member)
+                        <tbody id="membersList">
                             <tr>
-                                <td><input type="checkbox" name="members[]" value="{{ $member->id }}"></td>
-                                <td>{{ $member->last_name }}</td>
-                                <td>{{ $member->first_name }}</td>
-                                <td>{{ $member->middle_name }}</td>
-                                <td>{{ $member->address }}</td>
-                                <td>{{ $member->barangay }}</td>
-                                <td>{{ $member->precinct }}</td>
-                                <td>  @if($member->coordinator)
-                                    BC
-                                @elseif($member->purokLeader)
-                                    PL
-                                @elseif($member->householdLeader)
-                                    HL
-                                @elseif($member->householdMember)  
-                                    HM
-                                @else
-                                    &nbsp;  <!-- Empty space for not tagged voters -->
-                                @endif
-                            </td>
+                                <td colspan="8" class="text-center">No data available. Please search.</td>
                             </tr>
-                            @endforeach
                         </tbody>
                     </table>
                     <div class="mt-3">
@@ -338,6 +343,56 @@
     </div>
 </div>
 
+
+<script>
+    $(document).ready(function () {
+    $('#searchMembersForm').submit(function (e) {
+        e.preventDefault();
+        let formData = $(this).serialize(); // Serialize form data
+
+        $.ajax({
+            url: "{{ route('searchHouseholdMembers') }}",
+            method: "GET",
+            data: formData,
+            beforeSend: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
+            },
+            success: function (data) {
+                let rows = '';
+
+                if (data.length === 0) {
+                    rows = '<tr><td colspan="8" class="text-center">No members found.</td></tr>';
+                } else {
+                    data.forEach(member => {
+                        rows += `
+                            <tr>
+                                <td><input type="checkbox" name="members[]" value="${member.id}"></td>
+                                <td>${member.last_name}</td>
+                                <td>${member.first_name}</td>
+                                <td>${member.middle_name || ''}</td>
+                                <td>${member.address || ''}</td>
+                                <td>${member.barangay || ''}</td>
+                                <td>${member.precinct || ''}</td>
+                                <td>
+                                    ${member.coordinator ? 'BC' : 
+                                    member.purokLeader ? 'PL' : 
+                                    member.householdLeader ? 'HL' : 
+                                    member.householdMember ? 'HM' : ''}
+                                </td>
+                            </tr>`;
+                    });
+                }
+
+                $('#membersList').html(rows);
+            },
+            error: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center text-danger">Error loading data.</td></tr>');
+            }
+        });
+    });
+});
+
+</script>
 
 
 <script>
