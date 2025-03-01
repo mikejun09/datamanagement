@@ -14,16 +14,19 @@ class PageController extends Controller
 {
    
     public function household_leader(Request $request)
-    {
-        $purok_leaders = MasterList::whereIn('id', PurokLeader::pluck('purok_leader_id'))->get();
-        $householdLeaders = HouseholdLeader::with('voter', 'purokLeader', 'purokLeader.coordinator')->get();
-        $barangays = Barangay::all();
-    
-        $barangay = $request->input('barangay');
-        $first_name = $request->input('first_name');
-        $last_name = $request->input('last_name');
-    
-        // Fetch voters based on search criteria
+{
+    $purok_leaders = MasterList::whereIn('id', PurokLeader::pluck('purok_leader_id'))->get();
+    $householdLeaders = HouseholdLeader::with('voter', 'purokLeader', 'purokLeader.coordinator')->get();
+    $barangays = Barangay::all();
+
+    $barangay = $request->input('barangay');
+    $first_name = $request->input('first_name');
+    $last_name = $request->input('last_name');
+
+    $voters = collect(); // Empty collection by default
+
+    // Only fetch data if at least one search field is provided
+    if ($barangay || $first_name || $last_name) {
         $voters = MasterList::when($barangay, function ($query, $barangay) {
                 return $query->where('barangay', 'like', "%{$barangay}%");
             })
@@ -34,9 +37,11 @@ class PageController extends Controller
                 return $query->where('last_name', 'like', "%{$last_name}%");
             })
             ->get();
-       
-        return view('admin.tagging_household_leader', compact('voters', 'purok_leaders', 'barangays', 'householdLeaders'));
     }
+
+    return view('admin.tagging_household_leader', compact('voters', 'purok_leaders', 'barangays', 'householdLeaders'));
+}
+
     
 
    

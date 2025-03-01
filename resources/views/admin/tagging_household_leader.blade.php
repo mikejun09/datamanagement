@@ -114,7 +114,76 @@
 @endif
 
 
-    
+    <table class="table table-hover table-bordered table-striped" id="example">
+        <thead>
+            <tr>
+                <th>Last Name</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Address</th>
+                <th>Barangay</th>
+                <th>Precinct</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+    @if($voters->isEmpty())
+        <tr>
+            <td colspan="8" class="text-center">No data available. Please perform a search.</td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+            <td style="display:none;"></td>
+        </tr>
+    @else
+        @foreach($voters as $voter)
+            <tr>
+                <td>{{ $voter->last_name }}</td>
+                <td>{{ $voter->first_name }}</td>
+                <td>{{ $voter->middle_name }}</td>
+                <td>{{ $voter->address }}</td>
+                <td>{{ $voter->barangay }}</td>
+                <td>{{ $voter->precinct }}</td>
+                <td>
+                    @if($voter->coordinator)
+                        BC
+                    @elseif($voter->purokLeader)
+                        PL
+                    @elseif($voter->householdLeader)
+                        HL
+                    @elseif($voter->householdMember)  
+                        HM
+                    @else
+                        &nbsp;  <!-- Empty space for not tagged voters -->
+                    @endif
+                </td>
+                <td>
+                    @if(session('selected_purok_leader'))
+                        <form action="{{ route('storeHouseholdLeader') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="voter_id" value="{{ $voter->id }}">
+                            <input type="hidden" name="purok_leader_id" value="{{ session('selected_purok_leader')->id }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill"></i> Add as Household Leader
+                            </button>
+                        </form>
+                    @else
+                        <button class="btn btn-secondary" disabled>Select a Purok Leader First</button>
+                    @endif
+                </td>
+            </tr>
+        @endforeach
+    @endif
+</tbody>
+
+    </table>
+    {{-- <div>
+        {{ $voters->links() }}
+    </div> --}}
 </div>
 
 
