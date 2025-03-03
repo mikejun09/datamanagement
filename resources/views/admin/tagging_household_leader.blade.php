@@ -60,7 +60,7 @@
 <h3>Tag a Household Leader</h3>
 </div>
 
-<div class="mt-5 col-md-12">
+<div class="mt-3 col-md-12">
                     <form method="GET" action="{{ route('household_leader') }}">
 
                         <div class="d-flex mb-2">
