@@ -95,6 +95,8 @@
     </div>
 @endif
 
+
+
 <!-- Display members under the selected leader -->
 @if(session('selectedLeader') && session('taggedMembers'))
     @php
@@ -108,7 +110,7 @@
     <div class="col text-end">
                 <button type="button" class="btn btn-primary add-members-btn mb-3 mt-2"
                     data-leader-id="{{ session('selectedLeader')->voter->id ?? '' }}"
-                    data-leader-name="{{ session('householdLeader')->voter->first_name ?? '' }} {{ session('householdLeader')->voter->last_name ?? '' }}"
+                    data-leader-name="{{ session('selectedLeader')->voter->first_name ?? '' }} {{ session('selectedLeader')->voter->last_name ?? '' }}"
                     data-bs-toggle="modal" data-bs-target="#householdLeaderModal">
                     Add Members
                 </button>
@@ -116,7 +118,11 @@
     </div>
 </div>
 
-    
+        @php
+            $taggedMembers = \App\Models\HouseholdMember::with('voter')
+                ->where('household_leader_id', $leader->household_leader_id)
+                ->get();
+        @endphp
 
     @if($taggedMembers->count() > 0)
         <div class="table-responsive">
@@ -253,7 +259,7 @@
                 $('#membersList').html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
             },
             success: function (data) {
-              
+                console.log(data); // Debugging - Check the response in console
                 let rows = '';
 
                 if (data.length === 0) {
@@ -300,62 +306,45 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Ensure leader ID is set correctly each time the modal is opened
-        document.body.addEventListener("click", function(event) {
-            if (event.target.classList.contains("add-members-btn")) {
-                let leaderId = event.target.getAttribute("data-leader-id");
-                let leaderName = event.target.getAttribute("data-leader-name");
+   document.addEventListener("DOMContentLoaded", function() {
+    // Ensure leader ID is set correctly each time the modal is opened
+    document.querySelectorAll(".add-members-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            let leaderId = this.getAttribute("data-leader-id");
+            let leaderName = this.getAttribute("data-leader-name");
 
-                if (leaderId) {
-                    let leaderInput = document.getElementById("household_leader_id");
-                    let leaderDisplay = document.getElementById("leaderName");
-
-                    if (leaderInput) leaderInput.value = leaderId;
-                    if (leaderDisplay) leaderDisplay.innerText = leaderName;
-                }
+            if (leaderId) {
+                document.getElementById("household_leader_id").value = leaderId;
+                document.getElementById("leaderName").innerText = leaderName;
             }
         });
-
-        // If session has modal show request
-        @if(session('showModal') && session('householdLeader'))
-            document.addEventListener("DOMContentLoaded", function() {
-                var modal = new bootstrap.Modal(document.getElementById('householdLeaderModal'));
-
-                let leaderInput = document.getElementById("household_leader_id");
-                let leaderDisplay = document.getElementById("leaderName");
-
-                if (leaderDisplay) {
-                    leaderDisplay.innerText = "{{ session('householdLeader')->voter->first_name }} {{ session('householdLeader')->voter->last_name }}";
-                }
-                if (leaderInput) {
-                    leaderInput.value = "{{ session('householdLeader')->household_leader_id }}";
-                }
-
-                modal.show();
-            });
-        @endif
-
-        // Select/Deselect all checkboxes
-        let checkAllBox = document.getElementById("checkAll");
-        if (checkAllBox) {
-            checkAllBox.addEventListener("click", function() {
-                let checkboxes = document.querySelectorAll("input[name='members[]']");
-                checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-            });
-        }
-
-        // Fix issue where modal backdrop remains after closing
-        let modalElement = document.getElementById('householdLeaderModal');
-        if (modalElement) {
-            modalElement.addEventListener('hidden.bs.modal', function () {
-                document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-                document.body.classList.remove('modal-open');
-            });
-        }
     });
-</script>
 
+    @if(session('showModal') && session('householdLeader'))
+        var modal = new bootstrap.Modal(document.getElementById('householdLeaderModal'));
+        document.getElementById('leaderName').innerText = "{{ session('householdLeader')->voter->first_name }} {{ session('householdLeader')->voter->last_name }}";
+        document.getElementById('household_leader_id').value = "{{ session('householdLeader')->household_leader_id }}";
+        modal.show();
+    @endif
+
+    // Select/Deselect all checkboxes
+    document.getElementById("checkAll").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll("input[name='members[]']");
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+
+    // Fix issue where modal backdrop remains after closing
+    var modalElement = document.getElementById('householdLeaderModal');
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        document.body.classList.remove('modal-open'); // Ensure scrolling is re-enabled
+    });
+});
+
+    </script>
     
     
 
@@ -382,6 +371,7 @@
         $('#membersTable').DataTable(); // Replace '#example' with your table's ID or class
     });
 </script>
+
 
 <script>
 
@@ -432,7 +422,4 @@ $(document).ready(function () {
 
 
 </script>
-
-
-
 @endsection

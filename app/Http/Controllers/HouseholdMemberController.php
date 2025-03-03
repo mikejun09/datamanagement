@@ -177,6 +177,19 @@ public function selectLeader(Request $request)
 }
 
 
+public function refreshTaggedMembers()
+{
+    $taggedMembers = session('taggedMembers', []);
+
+    return response()->json([
+        'html' => view('partials.tagged-members', compact('taggedMembers'))->render()
+    ]);
+}
+
+
+
+
+
 
 }
 

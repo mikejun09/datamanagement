@@ -46,6 +46,7 @@ Route::post('/purok-leader/store', [TaggingController::class, 'storePurokLeader'
 Route::get('/search-voters', [VoterController::class, 'searchVoters']);
 
 Route::post('/tag-household-members', [HouseholdMemberController::class, 'tagHouseholdMembers'])->name('tagHouseholdMembers');
+Route::post('/tag-household-members-new', [HouseholdMemberController::class, 'tagHouseholdMembers'])->name('tagHouseholdMembers_new');
 
 Route::post('/select_purok_leader', [TaggingController::class, 'select_purok_leader'])->name('select_purok_leader');
 Route::post('/storeHouseholdLeader', [TaggingController::class, 'storeHouseholdLeader'])->name('storeHouseholdLeader');
@@ -90,6 +91,7 @@ Route::post('/add_user', [AdminController::class, 'store_user'])->name('add_user
 
 Route::get('/searchHouseholdMembers', [PageController::class, 'searchHouseholdMembers'])->name('searchHouseholdMembers');
 
+Route::get('/refresh-tagged-members', [HouseholdMemberController::class, 'refreshTaggedMembers'])->name('refresh.tagged.members');
 
 
 
