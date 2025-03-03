@@ -61,11 +61,18 @@ public function searchHouseholdMembers(Request $request)
             ->when($last_name, function ($query, $last_name) {
                 return $query->where('last_name', 'like', "%{$last_name}%");
             })
+            ->with([
+                'coordinator:id,coordinator_id', 
+                'purokLeader:id,purok_leader_id', 
+                'householdLeader:id,household_leader_id', 
+                'householdMember:id,household_member_id'
+            ])
             ->get();
     }
 
     return response()->json($members); // Return JSON response for AJAX
 }
+
 
 
     

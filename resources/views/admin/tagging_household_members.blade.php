@@ -187,7 +187,7 @@
 
 
 
-<!-- Modal -->
+<!-- Bootstrap Extra Large Modal -->
 <div class="modal fade" id="householdLeaderModal" tabindex="-1" aria-labelledby="householdLeaderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -196,10 +196,34 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+
+                <!-- Search Form -->
+                <form id="searchMembersForm">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="last_name" placeholder="Last Name">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="first_name" placeholder="First Name">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="barangay">
+                                <option value="">All Barangay</option>
+                                @foreach ($barangays as $barangay)
+                                    <option value="{{ $barangay->barangay }}">{{ $barangay->barangay }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Members Table -->
                 <form id="tagMembersForm" action="{{ route('tagHouseholdMembers') }}" method="POST">
                     @csrf
                     <input type="hidden" name="household_leader_id" id="household_leader_id">
-                    <!-- Your table of potential members will go here -->
                     <table id="membersTable" class="table table-striped">
                         <thead>
                             <tr>
@@ -213,31 +237,17 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach(session('potentialMembers', []) as $member)
-                                <tr>
-                                    <td><input type="checkbox" name="members[]" value="{{ $member->id }}"></td>
-                                    <td>{{ $member->last_name }}</td>
-                                    <td>{{ $member->first_name }}</td>
-                                    <td>{{ $member->middle_name }}</td>
-                                    <td>{{ $member->address }}</td>
-                                    <td>{{ $member->barangay }}</td>
-                                    <td>{{ $member->precinct }}</td>
-                                    <td> 
-                                        @if($member->coordinator)
-                                            BC
-                                        @elseif($member->purokLeader)
-                                            PL
-                                        @elseif($member->householdLeader)
-                                            HL
-                                        @elseif($member->householdMember)  
-                                            HM
-                                        @else
-                                            &nbsp;
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
+                        <tbody id="membersList">
+                            <tr>
+                                <td colspan="8" class="text-center">No data available. Please search.</td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                            </tr>
                         </tbody>
                     </table>
                     <div class="mt-3">
@@ -249,30 +259,122 @@
     </div>
 </div>
 
+
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // When the "Add Members" button is clicked
-        document.querySelectorAll(".add-members-btn").forEach(button => {
-            button.addEventListener("click", function() {
-                // Get the household leader ID and leader name from the button's data attributes
-                let leaderId = this.getAttribute("data-leader-id");
-                let leaderName = this.getAttribute("data-leader-name");
+ $(document).ready(function () {
+    $('#searchMembersForm').submit(function (e) {
+        e.preventDefault();
+        let formData = $(this).serialize(); // Serialize form data
 
-                // Set the leader ID in the hidden input inside the modal
-                document.getElementById("household_leader_id").value = leaderId;
+        $.ajax({
+            url: "{{ route('searchHouseholdMembers') }}",
+            method: "GET",
+            data: formData,
+            beforeSend: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
+            },
+            success: function (data) {
+                console.log(data); // Debugging - Check the response in console
+                let rows = '';
 
-                // Set the leader's name in the modal title
-                document.getElementById("leaderName").innerText = leaderName;
-            });
-        });
+                if (data.length === 0) {
+                    rows = '<tr><td colspan="8" class="text-center">No members found.</td></tr>';
+                } else {
+                    data.forEach(member => {
+                        let status = '&nbsp;'; // Default empty if no status
 
-        // Select/Deselect all checkboxes
-        document.getElementById("checkAll").addEventListener("click", function() {
-            let checkboxes = document.querySelectorAll("input[name='members[]']");
-            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+                        if (member.coordinator) {
+                            status = 'BC';
+                        } else if (member.purok_leader) {
+                            status = 'PL';
+                        } else if (member.household_leader) {
+                            status = 'HL';
+                        } else if (member.household_member) {
+                            status = 'HM';
+                        }
+
+                        rows += `
+                            <tr>
+                                <td><input type="checkbox" name="members[]" value="${member.id}"></td>
+                                <td>${member.last_name}</td>
+                                <td>${member.first_name}</td>
+                                <td>${member.middle_name || ''}</td>
+                                <td>${member.address || ''}</td>
+                                <td>${member.barangay || ''}</td>
+                                <td>${member.precinct || ''}</td>
+                                <td>${status}</td>
+                            </tr>`;
+                    });
+                }
+
+                $('#membersList').html(rows);
+            },
+            error: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center text-danger">Error loading data.</td></tr>');
+            }
         });
     });
+});
+
+
 </script>
+
+
+<script>
+   document.addEventListener("DOMContentLoaded", function() {
+    // Ensure leader ID is set correctly each time the modal is opened
+    document.querySelectorAll(".add-members-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            let leaderId = this.getAttribute("data-leader-id");
+            let leaderName = this.getAttribute("data-leader-name");
+
+            if (leaderId) {
+                document.getElementById("household_leader_id").value = leaderId;
+                document.getElementById("leaderName").innerText = leaderName;
+            }
+        });
+    });
+
+    @if(session('showModal') && session('householdLeader'))
+        var modal = new bootstrap.Modal(document.getElementById('householdLeaderModal'));
+        document.getElementById('leaderName').innerText = "{{ session('householdLeader')->voter->first_name }} {{ session('householdLeader')->voter->last_name }}";
+        document.getElementById('household_leader_id').value = "{{ session('householdLeader')->household_leader_id }}";
+        modal.show();
+    @endif
+
+    // Select/Deselect all checkboxes
+    document.getElementById("checkAll").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll("input[name='members[]']");
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+
+    // Fix issue where modal backdrop remains after closing
+    var modalElement = document.getElementById('householdLeaderModal');
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        document.body.classList.remove('modal-open'); // Ensure scrolling is re-enabled
+    });
+});
+
+    </script>
+    
+    
+
+
+    @if (session('showModal'))
+    <script>
+        // Trigger your modal here
+        $('#householdLeaderModal').modal('show');  // Adjust this line to match your modal trigger
+        // Clear the session key after showing the modal
+        @php
+            session()->forget('showModal');
+        @endphp
+    </script>
+@endif
+
 
     
 

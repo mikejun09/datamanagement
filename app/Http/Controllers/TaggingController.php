@@ -250,50 +250,46 @@ public function household_leader(Request $request)
 
 public function storeHouseholdLeader(Request $request)
 {
-    $votersId = $request->voter_id;
+    $voterId = $request->voter_id;
 
-    // Clear session first to prevent old data from persisting
+    // Clear previous session data
     session()->forget(['showModal', 'householdLeader', 'potentialMembers']);
 
-    // Check if voter is already assigned
-    $existingCoordinator = Coordinator::where('coordinator_id', $votersId)->exists();
-    $existingPurokLeader = PurokLeader::where('purok_leader_id', $votersId)->exists();
-    $existingHouseholdLeader = HouseholdLeader::where('household_leader_id', $votersId)->exists();
-
-    if ($existingCoordinator) {
+    // Check if voter is already assigned to a role
+    if (Coordinator::where('coordinator_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Coordinator.');
     }
 
-    if ($existingPurokLeader) {
+    if (PurokLeader::where('purok_leader_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Purok Leader.');
     }
 
-    if ($existingHouseholdLeader) {
+    if (HouseholdLeader::where('household_leader_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Household Leader.');
     }
 
     // Store new household leader
     $householdLeader = HouseholdLeader::create([
-        'household_leader_id' => $votersId,
+        'household_leader_id' => $voterId,
         'purok_leader_id' => $request->purok_leader_id,
         'remarks' => 'Household Leader',
     ]);
 
-    // Get untagged voters (potential members)
-    
-    $potentialMembers = MasterList::with(['coordinator', 'purokLeader', 'householdLeader', 'householdMember'])->get();
+    // Fetch only untagged voters (potential members)
+    $potentialMembers = MasterList::whereDoesntHave('coordinator')
+        ->whereDoesntHave('purokLeader')
+        ->whereDoesntHave('householdLeader')
+        ->whereDoesntHave('householdMember')
+        ->get();
+
     // Get the newly tagged household leader with voter details
-    $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $votersId)->first();
+    $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $voterId)->first();
 
-    // Get household members assigned under this household leader
-    $taggedMembers = HouseholdMember::where('household_leader_id', $votersId)->get();
-
-    // Set session data only on success
+    // Store only necessary data in session
     session([
-        'householdLeader' => $householdLeader,
-        'potentialMembers' => $potentialMembers,
+        'householdLeaderId' => $householdLeader->id,
         'showModal' => true,
-        'session_expires_at' => now()->addMinutes(30), // Set expiration to 1 minute from now
+        'session_expires_at' => now()->addMinutes(30),
     ]);
 
     return redirect()->back()->with('success', 'Voter registered successfully as a Household Leader!');
@@ -312,44 +308,34 @@ public function household_member(Request $request)
     $first_name = $request->input('first_name');
     $last_name = $request->input('last_name');
 
-    // Default: Select all voters if no search query is provided
-    $voters = MasterList::when($barangay, function ($query, $barangay) {
-            return $query->where('barangay', 'like', "%{$barangay}%");
-        })
-        ->when($first_name, function ($query, $first_name) {
-            return $query->where('first_name', 'like', "%{$first_name}%");
-        })
-        ->when($last_name, function ($query, $last_name) {
-            return $query->where('last_name', 'like', "%{$last_name}%");
-        })
-        ->where(function ($query) {
-            // Only get voters who are tagged as any of the leaders
-            $query->whereHas('coordinator')
-                ->orWhereHas('purokLeader')
-                ->orWhereHas('householdLeader');
-        })
-        ->with(['coordinator', 'purokLeader', 'householdLeader']) // Eager load relationships
-        ->paginate(10); // Using pagination for better performance with large data sets
+    // Check if the user performed a search
+    $hasSearch = $barangay || $first_name || $last_name;
 
-    // Optionally, filter masterList similarly
-    $masterList = MasterList::when($barangay, function ($query, $barangay) {
-            return $query->where('barangay', 'like', "%{$barangay}%");
-        })
-        ->when($first_name, function ($query, $first_name) {
-            return $query->where('first_name', 'like', "%{$first_name}%");
-        })
-        ->when($last_name, function ($query, $last_name) {
-            return $query->where('last_name', 'like', "%{$last_name}%");
-        })
-        ->get();
+    // Fetch voters only if a search was performed
+    $voters = collect(); // Default to empty collection
 
+    if ($hasSearch) {
+        $voters = MasterList::when($barangay, function ($query, $barangay) {
+                return $query->where('barangay', 'like', "%{$barangay}%");
+            })
+            ->when($first_name, function ($query, $first_name) {
+                return $query->where('first_name', 'like', "%{$first_name}%");
+            })
+            ->when($last_name, function ($query, $last_name) {
+                return $query->where('last_name', 'like', "%{$last_name}%");
+            })
+            ->where(function ($query) {
+                $query->whereHas('coordinator')
+                    ->orWhereHas('purokLeader')
+                    ->orWhereHas('householdLeader');
+            })
+            ->with(['coordinator', 'purokLeader', 'householdLeader'])
+            ->paginate(10);
+    }
 
-        $potentialMembers = MasterList::all();
-        session(['potentialMembers' => $potentialMembers]);
-session(['householdLeader' => $request->input('household_leader_id')]);
-
-    return view('admin.search_leader', compact('voters', 'barangays', 'masterList'));
+    return view('admin.search_leader', compact('voters', 'barangays', 'hasSearch'));
 }
+
 
 
 

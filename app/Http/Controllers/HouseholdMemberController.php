@@ -15,55 +15,45 @@ class HouseholdMemberController extends Controller
 {
     public function tagHouseholdMembers(Request $request)
     {
-        
         $householdLeaderId = $request->household_leader_id;
         $selectedMembers = $request->members;
     
         if (!$selectedMembers) {
-            return redirect()->back()->with('error', 'No members selected.');
+            return response()->json(['error' => 'No members selected.'], 400);
         }
     
         foreach ($selectedMembers as $memberId) {
-            // Check if the member is already tagged as a coordinator, purok leader, household leader, or household member
-            $existingCoordinator = Coordinator::where('coordinator_id', $memberId)->exists();
-            $existingPurokLeader = PurokLeader::where('purok_leader_id', $memberId)->exists();
-            $existingHouseholdLeader = HouseholdLeader::where('household_leader_id', $memberId)->exists();
-            $existingHouseholdMember = HouseholdMember::where('household_member_id', $memberId)->exists();
-    
-            if ($existingCoordinator) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Coordinator.');
+            // Check if the member is already tagged
+            if (Coordinator::where('coordinator_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Coordinator.'], 400);
             }
     
-            if ($existingPurokLeader) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Purok Leader.');
+            if (PurokLeader::where('purok_leader_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Purok Leader.'], 400);
             }
     
-            if ($existingHouseholdLeader) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Household Leader.');
+            if (HouseholdLeader::where('household_leader_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Household Leader.'], 400);
             }
     
-            if ($existingHouseholdMember) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Household Member.');
+            if (HouseholdMember::where('household_member_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Household Member.'], 400);
             }
     
-            // Only create HouseholdMember if not tagged already
+            // Create HouseholdMember
             HouseholdMember::create([
                 'household_member_id' => $memberId,
                 'household_leader_id' => $householdLeaderId,
             ]);
         }
     
-        // After adding members, get the updated tagged members
-        $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $householdLeaderId)->first();
+        // Fetch updated members
         $taggedMembers = HouseholdMember::where('household_leader_id', $householdLeaderId)->get();
     
-        session([
-            'householdLeader' => $householdLeader,
-            'taggedMembers' => $taggedMembers,
-            'session_expires_at' => now()->addMinutes(30),
+        return response()->json([
+            'success' => 'Household members successfully tagged!',
+            'taggedMembers' => $taggedMembers
         ]);
-    
-        return redirect()->back()->with('success', 'Household members successfully tagged!');
     }
     
 
@@ -137,32 +127,41 @@ public function searchLeader(Request $request)
     $first_name = $request->input('first_name');
     $last_name = $request->input('last_name');
 
-    // Default: Select all voters if no search query is provided
-    $voters = MasterList::when($barangay, function ($query, $barangay) {
-            return $query->where('barangay', 'like', "%{$barangay}%");
-        })
-        ->when($first_name, function ($query, $first_name) {
-            return $query->where('first_name', 'like', "%{$first_name}%");
-        })
-        ->when($last_name, function ($query, $last_name) {
-            return $query->where('last_name', 'like', "%{$last_name}%");
-        })
-        ->where(function ($query) {
-            // Only get voters who are tagged as any of the leaders
-            $query->whereHas('coordinator')
-                ->orWhereHas('purokLeader')
-                ->orWhereHas('householdLeader');
-        })
-        ->with(['coordinator', 'purokLeader', 'householdLeader']) // Eager load relationships
-        ->paginate(10); // Using pagination for better performance with large data sets
+    // Check if a search is performed
+    $hasSearch = !empty($barangay) || !empty($first_name) || !empty($last_name);
+
+    // Fetch voters only if a search was performed
+    $voters = collect(); // Default to empty collection
+
+    if ($hasSearch) {
+        $voters = MasterList::when($barangay, function ($query, $barangay) {
+                return $query->where('barangay', $barangay); // Exact match for faster filtering
+            })
+            ->when($first_name, function ($query, $first_name) {
+                return $query->where('first_name', 'like', "{$first_name}%"); // Optimized search
+            })
+            ->when($last_name, function ($query, $last_name) {
+                return $query->where('last_name', 'like', "{$last_name}%");
+            })
+            ->where(function ($query) {
+                // Only get voters who are tagged as leaders
+                $query->whereHas('coordinator')
+                    ->orWhereHas('purokLeader')
+                    ->orWhereHas('householdLeader');
+            })
+            ->with(['coordinator', 'purokLeader', 'householdLeader']) // Eager load relationships
+            ->paginate(10); // Pagination for performance
+    }
 
     // Return the view with filtered leaders and barangays
-    return view('admin.search_leader', compact('voters', 'barangays'));
+    return view('admin.search_leader', compact('voters', 'barangays', 'hasSearch'));
 }
+
 
 
 public function selectLeader(Request $request)
 {
+
     
     $leader = HouseholdLeader::where('household_leader_id', $request->leader_id)->first();
 
