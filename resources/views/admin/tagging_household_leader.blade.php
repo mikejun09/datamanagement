@@ -56,6 +56,10 @@
     });
 </script>
 
+<div class="row">
+<h3>Tag a Household Leader</h3>
+</div>
+
 <div class="mt-5 col-md-12">
                     <form method="GET" action="{{ route('household_leader') }}">
 
@@ -92,7 +96,7 @@
 
 
 <div class="row mt-5 mb-5">
-    <h3>Tag a Household Leader</h3>
+    
 
 
     @if (session('success'))
