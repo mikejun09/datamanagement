@@ -2,6 +2,9 @@
 
 @section('content')
 <div class="mt-5 col-md-12">
+    <div class="row mb-3">
+    <h3>Select Household Leader</h3>
+    </div>
     <form method="GET" action="{{ route('user_search-leader') }}">
 
         <div class="d-flex mb-2">
@@ -32,70 +35,53 @@
     </form>
 </div>
 
-<div class="row mt-5 mb-5">
-    <h3>Select Household Leader</h3>
+@if($hasSearch) {{-- Only show table if a search is performed --}}
+    <div class="row mt-5 mb-5">
+        
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <table class="table table-hover table-bordered table-striped" id="example">
-        <thead>
-            <tr>
-          
-                <th>Last Name</th>
-                <th>First Name</th>
-                <th>Middle Name</th>
-                <th>Address</th>
-                <th>Barangay</th>
-                <th>Precinct</th>
-                <th>Status</th>
-                <th>Action</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($voters as $voter)
+        <table class="table table-hover table-bordered table-striped">
+            <thead>
                 <tr>
-                   
-                    <td>{{ $voter->last_name }}</td>
-                    <td>{{ $voter->first_name }}</td>
-                    <td>{{ $voter->middle_name }}</td>
-                    <td>{{ $voter->address }}</td>
-                    <td>{{ $voter->barangay }}</td>
-                    <td>{{ $voter->precinct }}</td>
-                    <td>
-                        @if($voter->coordinator)
-                            BC
-                        @elseif($voter->purokLeader)
-                            PL
-                        @elseif($voter->householdLeader)
-                            HL
-                        @elseif($voter->householdMember)  
-                            HM
-                        @else
-                            &nbsp;  <!-- Empty space for not tagged voters -->
-                        @endif
-                    </td>
-                    <td>
-                        <form method="POST" action="{{ route('user_select-leader') }}">
-                            @csrf
-                            <input type="hidden" name="leader_id" value="{{ $voter->id }}">
-                            <button type="submit" class="btn btn-primary">SELECT HOUSEHOLD LEADER</button>
-                        </form>
-                    </td>
+                    <th>Last Name</th>
+                    <th>First Name</th>
+                    <th>Middle Name</th>
+                    <th>Address</th>
+                    <th>Barangay</th>
+                    <th>Precinct</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach($voters as $voter)
+                    <tr>
+                        <td>{{ $voter->last_name }}</td>
+                        <td>{{ $voter->first_name }}</td>
+                        <td>{{ $voter->middle_name }}</td>
+                        <td>{{ $voter->address }}</td>
+                        <td>{{ $voter->barangay }}</td>
+                        <td>{{ $voter->precinct }}</td>
+                        <td>
+                            @if($voter->coordinator) BC
+                            @elseif($voter->purokLeader) PL
+                            @elseif($voter->householdLeader) HL
+                            @elseif($voter->householdMember) HM
+                            @else &nbsp;
+                            @endif
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ route('user_select-leader') }}">
+                                @csrf
+                                <input type="hidden" name="leader_id" value="{{ $voter->id }}">
+                                <button type="submit" class="btn btn-primary">SELECT HOUSEHOLD LEADER</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endif {{-- End of hasSearch check --}}
 </div>
 
 <!-- Display selected leader's information -->
@@ -108,6 +94,8 @@
         </p>
     </div>
 @endif
+
+
 
 <!-- Display members under the selected leader -->
 @if(session('selectedLeader') && session('taggedMembers'))
@@ -122,7 +110,7 @@
     <div class="col text-end">
                 <button type="button" class="btn btn-primary add-members-btn mb-3 mt-2"
                     data-leader-id="{{ session('selectedLeader')->voter->id ?? '' }}"
-                    data-leader-name="{{ session('householdLeader')->voter->first_name ?? '' }} {{ session('householdLeader')->voter->last_name ?? '' }}"
+                    data-leader-name="{{ session('selectedLeader')->voter->first_name ?? '' }} {{ session('selectedLeader')->voter->last_name ?? '' }}"
                     data-bs-toggle="modal" data-bs-target="#householdLeaderModal">
                     Add Members
                 </button>
@@ -130,7 +118,11 @@
     </div>
 </div>
 
-    
+        @php
+            $taggedMembers = \App\Models\HouseholdMember::with('voter')
+                ->where('household_leader_id', $leader->household_leader_id)
+                ->get();
+        @endphp
 
     @if($taggedMembers->count() > 0)
         <div class="table-responsive">
@@ -157,7 +149,7 @@
                                 <td>{{ $member->voter->barangay }}</td>
                                 <td>{{ $member->voter->precinct }}</td>
                                 <td>
-                                    <form action="{{ route('member_voter.destroy', $member->voter->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this voter?');">
+                                    <form action="{{ route('voter.destroy', $member->voter->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this voter?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn1 btn-danger btn-sm">Delete</button>
@@ -179,7 +171,8 @@
 <!-- ==============================================add members======================================================== -->
 
 
-<!-- Modal -->
+
+<!-- Bootstrap Extra Large Modal -->
 <div class="modal fade" id="householdLeaderModal" tabindex="-1" aria-labelledby="householdLeaderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -188,10 +181,34 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+
+                <!-- Search Form -->
+                <form id="searchMembersForm">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="last_name" placeholder="Last Name">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="first_name" placeholder="First Name">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="barangay">
+                                <option value="">All Barangay</option>
+                                @foreach ($barangays as $barangay)
+                                    <option value="{{ $barangay->barangay }}">{{ $barangay->barangay }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Members Table -->
                 <form id="tagMembersForm" action="{{ route('user_tagHouseholdMembers') }}" method="POST">
                     @csrf
                     <input type="hidden" name="household_leader_id" id="household_leader_id">
-                    <!-- Your table of potential members will go here -->
                     <table id="membersTable" class="table table-striped">
                         <thead>
                             <tr>
@@ -205,31 +222,17 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach(session('potentialMembers', []) as $member)
-                                <tr>
-                                    <td><input type="checkbox" name="members[]" value="{{ $member->id }}"></td>
-                                    <td>{{ $member->last_name }}</td>
-                                    <td>{{ $member->first_name }}</td>
-                                    <td>{{ $member->middle_name }}</td>
-                                    <td>{{ $member->address }}</td>
-                                    <td>{{ $member->barangay }}</td>
-                                    <td>{{ $member->precinct }}</td>
-                                    <td> 
-                                        @if($member->coordinator)
-                                            BC
-                                        @elseif($member->purokLeader)
-                                            PL
-                                        @elseif($member->householdLeader)
-                                            HL
-                                        @elseif($member->householdMember)  
-                                            HM
-                                        @else
-                                            &nbsp;
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
+                        <tbody id="membersList">
+                            <tr>
+                                <td colspan="8" class="text-center">No data available. Please search.</td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                                <td style="display:none;"></td>
+                            </tr>
                         </tbody>
                     </table>
                     <div class="mt-3">
@@ -242,32 +245,107 @@
 </div>
 
 
-<!-- ========================================= -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // When the "Add Members" button is clicked
-        document.querySelectorAll(".add-members-btn").forEach(button => {
-            button.addEventListener("click", function() {
-                // Get the household leader ID and leader name from the button's data attributes
-                let leaderId = this.getAttribute("data-leader-id");
-                let leaderName = this.getAttribute("data-leader-name");
+ $(document).ready(function () {
+    $('#searchMembersForm').submit(function (e) {
+        e.preventDefault();
+        let formData = $(this).serialize(); // Serialize form data
 
-                // Set the leader ID in the hidden input inside the modal
-                document.getElementById("household_leader_id").value = leaderId;
+        $.ajax({
+            url: "{{ route('user_searchHouseholdMembers') }}",
+            method: "GET",
+            data: formData,
+            beforeSend: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
+            },
+            success: function (data) {
+                console.log(data); // Debugging - Check the response in console
+                let rows = '';
 
-                // Set the leader's name in the modal title
-                document.getElementById("leaderName").innerText = leaderName;
-            });
-        });
+                if (data.length === 0) {
+                    rows = '<tr><td colspan="8" class="text-center">No members found.</td></tr>';
+                } else {
+                    data.forEach(member => {
+                        let status = '&nbsp;'; // Default empty if no status
 
-        // Select/Deselect all checkboxes
-        document.getElementById("checkAll").addEventListener("click", function() {
-            let checkboxes = document.querySelectorAll("input[name='members[]']");
-            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+                        if (member.coordinator) {
+                            status = 'BC';
+                        } else if (member.purok_leader) {
+                            status = 'PL';
+                        } else if (member.household_leader) {
+                            status = 'HL';
+                        } else if (member.household_member) {
+                            status = 'HM';
+                        }
+
+                        rows += `
+                            <tr>
+                                <td><input type="checkbox" name="members[]" value="${member.id}"></td>
+                                <td>${member.last_name}</td>
+                                <td>${member.first_name}</td>
+                                <td>${member.middle_name || ''}</td>
+                                <td>${member.address || ''}</td>
+                                <td>${member.barangay || ''}</td>
+                                <td>${member.precinct || ''}</td>
+                                <td>${status}</td>
+                            </tr>`;
+                    });
+                }
+
+                $('#membersList').html(rows);
+            },
+            error: function () {
+                $('#membersList').html('<tr><td colspan="8" class="text-center text-danger">Error loading data.</td></tr>');
+            }
         });
     });
+});
+
+
 </script>
 
+
+<script>
+   document.addEventListener("DOMContentLoaded", function() {
+    // Ensure leader ID is set correctly each time the modal is opened
+    document.querySelectorAll(".add-members-btn").forEach(button => {
+        button.addEventListener("click", function() {
+            let leaderId = this.getAttribute("data-leader-id");
+            let leaderName = this.getAttribute("data-leader-name");
+
+            if (leaderId) {
+                document.getElementById("household_leader_id").value = leaderId;
+                document.getElementById("leaderName").innerText = leaderName;
+            }
+        });
+    });
+
+    @if(session('showModal') && session('householdLeader'))
+        var modal = new bootstrap.Modal(document.getElementById('householdLeaderModal'));
+        document.getElementById('leaderName').innerText = "{{ session('householdLeader')->voter->first_name }} {{ session('householdLeader')->voter->last_name }}";
+        document.getElementById('household_leader_id').value = "{{ session('householdLeader')->household_leader_id }}";
+        modal.show();
+    @endif
+
+    // Select/Deselect all checkboxes
+    document.getElementById("checkAll").addEventListener("click", function() {
+        let checkboxes = document.querySelectorAll("input[name='members[]']");
+        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+    });
+
+    // Fix issue where modal backdrop remains after closing
+    var modalElement = document.getElementById('householdLeaderModal');
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        document.body.classList.remove('modal-open'); // Ensure scrolling is re-enabled
+    });
+});
+
+    </script>
+    
     
 
 
@@ -283,6 +361,7 @@
 @endif
 
 
+
 <script>
     $(document).ready(function() {
         $('#example').DataTable(); // Replace '#example' with your table's ID or class
@@ -291,5 +370,56 @@
     $(document).ready(function() {
         $('#membersTable').DataTable(); // Replace '#example' with your table's ID or class
     });
+</script>
+
+
+<script>
+
+$(document).ready(function () {
+
+    $('#householdLeaderModal').on('hidden.bs.modal', function () {
+        location.reload(); // Reload the page
+    });
+
+
+    // Submit form via AJAX
+    $('#tagMembersForm').submit(function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        let formData = $(this).serialize(); // Serialize form data
+
+        $.ajax({
+            url: "{{ route('user_tagHouseholdMembers') }}",
+            method: "POST",
+            data: formData,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            beforeSend: function () {
+                $('#tagMembersForm button[type="submit"]').prop('disabled', true).text('Tagging...');
+            },
+            success: function (response) {
+                // Show success message
+                $('#tagMembersForm').append('<div class="alert alert-success mt-3">' + response.success + '</div>');
+
+                // Re-enable button
+                $('#tagMembersForm button[type="submit"]').prop('disabled', false).text('Tag Selected Members');
+
+                // Refresh the members list (optional)
+                $('#searchMembersForm').trigger('submit'); // Re-trigger search
+
+                // Clear checkboxes
+                $('input[name="members[]"]').prop('checked', false);
+            },
+            error: function (xhr) {
+                let errorMessage = xhr.responseJSON?.error || 'An error occurred. Please try again.';
+                $('#tagMembersForm').append('<div class="alert alert-danger mt-3">' + errorMessage + '</div>');
+                $('#tagMembersForm button[type="submit"]').prop('disabled', false).text('Tag Selected Members');
+            }
+        });
+    });
+});
+
+
 </script>
 @endsection

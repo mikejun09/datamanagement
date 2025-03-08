@@ -179,50 +179,46 @@ public function select_purok_leader(Request $request)
 
 public function storeHouseholdLeader(Request $request)
 {
-    $votersId = $request->voter_id;
+    $voterId = $request->voter_id;
 
-    // Clear session first to prevent old data from persisting
+    // Clear previous session data
     session()->forget(['showModal', 'householdLeader', 'potentialMembers']);
 
-    // Check if voter is already assigned
-    $existingCoordinator = Coordinator::where('coordinator_id', $votersId)->exists();
-    $existingPurokLeader = PurokLeader::where('purok_leader_id', $votersId)->exists();
-    $existingHouseholdLeader = HouseholdLeader::where('household_leader_id', $votersId)->exists();
-
-    if ($existingCoordinator) {
+    // Check if voter is already assigned to a role
+    if (Coordinator::where('coordinator_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Coordinator.');
     }
 
-    if ($existingPurokLeader) {
+    if (PurokLeader::where('purok_leader_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Purok Leader.');
     }
 
-    if ($existingHouseholdLeader) {
+    if (HouseholdLeader::where('household_leader_id', $voterId)->exists()) {
         return redirect()->back()->with('error', 'This voter is already assigned as a Household Leader.');
     }
 
     // Store new household leader
     $householdLeader = HouseholdLeader::create([
-        'household_leader_id' => $votersId,
+        'household_leader_id' => $voterId,
         'purok_leader_id' => $request->purok_leader_id,
         'remarks' => 'Household Leader',
     ]);
 
-    // Get untagged voters (potential members)
-    
-    $potentialMembers = MasterList::with(['coordinator', 'purokLeader', 'householdLeader', 'householdMember'])->get();
+    // Fetch only untagged voters (potential members)
+    $potentialMembers = MasterList::whereDoesntHave('coordinator')
+        ->whereDoesntHave('purokLeader')
+        ->whereDoesntHave('householdLeader')
+        ->whereDoesntHave('householdMember')
+        ->get();
+
     // Get the newly tagged household leader with voter details
-    $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $votersId)->first();
+    $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $voterId)->first();
 
-    // Get household members assigned under this household leader
-    $taggedMembers = HouseholdMember::where('household_leader_id', $votersId)->get();
-
-    // Set session data only on success
+    // Store only necessary data in session
     session([
-        'householdLeader' => $householdLeader,
-        'potentialMembers' => $potentialMembers,
+        'householdLeaderId' => $householdLeader->id,
         'showModal' => true,
-        'session_expires_at' => now()->addMinutes(30), // Set expiration to 1 minute from now
+        'session_expires_at' => now()->addMinutes(30),
     ]);
 
     return redirect()->back()->with('success', 'Voter registered successfully as a Household Leader!');
@@ -248,56 +244,47 @@ public function user_destroy($id)
 
 public function tagHouseholdMembers(Request $request)
     {
-        
         $householdLeaderId = $request->household_leader_id;
         $selectedMembers = $request->members;
     
         if (!$selectedMembers) {
-            return redirect()->back()->with('error', 'No members selected.');
+            return response()->json(['error' => 'No members selected.'], 400);
         }
     
         foreach ($selectedMembers as $memberId) {
-            // Check if the member is already tagged as a coordinator, purok leader, household leader, or household member
-            $existingCoordinator = Coordinator::where('coordinator_id', $memberId)->exists();
-            $existingPurokLeader = PurokLeader::where('purok_leader_id', $memberId)->exists();
-            $existingHouseholdLeader = HouseholdLeader::where('household_leader_id', $memberId)->exists();
-            $existingHouseholdMember = HouseholdMember::where('household_member_id', $memberId)->exists();
-    
-            if ($existingCoordinator) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Coordinator.');
+            // Check if the member is already tagged
+            if (Coordinator::where('coordinator_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Coordinator.'], 400);
             }
     
-            if ($existingPurokLeader) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Purok Leader.');
+            if (PurokLeader::where('purok_leader_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Purok Leader.'], 400);
             }
     
-            if ($existingHouseholdLeader) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Household Leader.');
+            if (HouseholdLeader::where('household_leader_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Household Leader.'], 400);
             }
     
-            if ($existingHouseholdMember) {
-                return redirect()->back()->with('error', 'This voter is already assigned as a Household Member.');
+            if (HouseholdMember::where('household_member_id', $memberId)->exists()) {
+                return response()->json(['error' => 'This voter is already assigned as a Household Member.'], 400);
             }
     
-            // Only create HouseholdMember if not tagged already
+            // Create HouseholdMember
             HouseholdMember::create([
                 'household_member_id' => $memberId,
                 'household_leader_id' => $householdLeaderId,
             ]);
         }
     
-        // After adding members, get the updated tagged members
-        $householdLeader = HouseholdLeader::with('voter')->where('household_leader_id', $householdLeaderId)->first();
+        // Fetch updated members
         $taggedMembers = HouseholdMember::where('household_leader_id', $householdLeaderId)->get();
     
-        session([
-            'householdLeader' => $householdLeader,
-            'taggedMembers' => $taggedMembers,
-            'session_expires_at' => now()->addMinutes(30),
+        return response()->json([
+            'success' => 'Household members successfully tagged!',
+            'taggedMembers' => $taggedMembers
         ]);
-    
-        return redirect()->back()->with('success', 'Household members successfully tagged!');
     }
+
 
 
     public function searchLeader(Request $request)
@@ -363,6 +350,36 @@ public function member_destroy($id)
     session(['taggedMembers' => $updatedMembers]);
 
     return redirect()->back()->with('success', 'Voter deleted successfully.');
+}
+
+public function searchHouseholdMembers(Request $request)
+{
+    $barangay = $request->input('barangay');
+    $first_name = $request->input('first_name');
+    $last_name = $request->input('last_name');
+
+    $members = collect(); // Empty collection by default
+
+    if ($barangay || $first_name || $last_name) {
+        $members = MasterList::when($barangay, function ($query, $barangay) {
+                return $query->where('barangay', 'like', "%{$barangay}%");
+            })
+            ->when($first_name, function ($query, $first_name) {
+                return $query->where('first_name', 'like', "%{$first_name}%");
+            })
+            ->when($last_name, function ($query, $last_name) {
+                return $query->where('last_name', 'like', "%{$last_name}%");
+            })
+            ->with([
+                'coordinator:id,coordinator_id', 
+                'purokLeader:id,purok_leader_id', 
+                'householdLeader:id,household_leader_id', 
+                'householdMember:id,household_member_id'
+            ])
+            ->get();
+    }
+
+    return response()->json($members); // Return JSON response for AJAX
 }
 
 

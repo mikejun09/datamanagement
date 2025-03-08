@@ -74,6 +74,23 @@ public function searchHouseholdMembers(Request $request)
 }
 
 
+public function destroy($id)
+{
+    $leader = HouseholdLeader::findOrFail($id);
+
+    // Ensure leader has no members before deleting
+    if ($leader->householdMembers()->count() > 0) {
+        return redirect()->back()->with('error', 'Cannot delete a Household Leader with members.');
+    }
+
+    $leader->delete();
+
+    // Clear the selectedLeader session
+    session()->forget('selectedLeader');
+
+    return redirect()->back()->with('success', 'Household Leader deleted successfully.');
+}
+
 
     
 

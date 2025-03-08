@@ -93,6 +93,7 @@ Route::get('/searchHouseholdMembers', [PageController::class, 'searchHouseholdMe
 
 Route::get('/refresh-tagged-members', [HouseholdMemberController::class, 'refreshTaggedMembers'])->name('refresh.tagged.members');
 
+Route::delete('/household-leader/{id}', [PageController::class, 'destroy'])->name('household-leader.destroy');
 
 
 });
@@ -113,6 +114,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::post('/user-select-coordinator', [UserTaggingController::class, 'selectCoordinator'])->name('user_select.coordinator');
     Route::delete('/user-purok-leader/{id}', [UserTaggingController::class, 'deletePurokLeader'])->name('user_deletePurokLeader');
     Route::post('/user-purok-leader/store', [UserTaggingController::class, 'storePurokLeader'])->name('user_purok_leader.store');
+    Route::get('/user_searchHouseholdMembers', [UserTaggingController::class, 'searchHouseholdMembers'])->name('user_searchHouseholdMembers');
+
+
 
     // =========================household leader======================
 

@@ -89,9 +89,17 @@
     <div class="alert alert-info">
         <h4>Selected Household Leader:</h4>
         <p>
-        <h2><strong>{{ session('selectedLeader')->voter->first_name }} 
-        {{ session('selectedLeader')->voter->last_name }}</strong></h2>
+            <h2><strong>{{ session('selectedLeader')->voter->first_name }} 
+            {{ session('selectedLeader')->voter->last_name }}</strong></h2>
         </p>
+
+        @if(session('selectedLeader')->householdMembers->isEmpty()) 
+            <form action="{{ route('household-leader.destroy', session('selectedLeader')->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this Household Leader?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        @endif
     </div>
 @endif
 
