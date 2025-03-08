@@ -97,7 +97,7 @@
             <form action="{{ route('household-leader.destroy', session('selectedLeader')->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this Household Leader?');">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-danger">Delete</button>
+                <button type="submit" class="btn1 btn-danger">Delete Household Leader</button>
             </form>
         @endif
     </div>
