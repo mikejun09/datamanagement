@@ -27,6 +27,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin_index', [AdminController::class, 'index'])->name('admin_index');
+    Route::get('/get-voters/{barangay}', [AdminController::class, 'getVoters']);
+
 
     Route::get('/voters', [TaggingController::class, 'index'])->name('voters.index');
     Route::post('/add-to-coordinator', [TaggingController::class, 'addToCoordinator'])->name('coordinator.add');
