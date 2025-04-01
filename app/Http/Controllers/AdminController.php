@@ -30,12 +30,9 @@ class AdminController extends Controller
             $barangay->tagged_voters_count = $taggedVotersCount;
             return $barangay;
         });
-        $overallTotal = MasterList::whereHas('coordinator')
-            ->orWhereHas('purokLeader')
-            ->orWhereHas('householdLeader')
-            ->orWhereHas('householdMember')
-            ->distinct('id')
-            ->count('id');
+
+
+        $overallTotal = $barangays->sum('tagged_voters_count');
             
         return view('admin.index', compact('barangays', 'overallTotal'));
     }

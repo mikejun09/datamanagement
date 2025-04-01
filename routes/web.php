@@ -98,6 +98,18 @@ Route::get('/refresh-tagged-members', [HouseholdMemberController::class, 'refres
 Route::delete('/household-leader/{id}', [PageController::class, 'destroy'])->name('household-leader.destroy');
 
 
+Route::get('/get-overall-total', function () {
+    $overallTotal = MasterList::whereHas('coordinator')
+        ->orWhereHas('purokLeader')
+        ->orWhereHas('householdLeader')
+        ->orWhereHas('householdMember')
+        ->distinct('id')
+        ->count('id');
+
+    return response()->json(['overallTotal' => $overallTotal]);
+});
+
+
 });
 
 // 🟢 User Routes (Protected)

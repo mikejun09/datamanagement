@@ -6,7 +6,7 @@
 
     <div class="row">
         <div class="card">
-            Overall Tagged Voters: {{ $overallTotal }}
+            Overall Tagged Voters: <span id="overallTotal">{{ $overallTotal }}</span>
         </div>
     </div>
 
@@ -98,6 +98,28 @@
             });
         });
     });
+</script>
+
+<script>
+    // Auto-refresh every 5 seconds (5000 milliseconds)
+    function fetchOverallTotal() {
+        $.ajax({
+            url: "{{ url('/get-overall-total') }}",  // Route to fetch the total
+            method: "GET",
+            success: function(response) {
+                $('#overallTotal').text(response.overallTotal);  // Update the total
+            },
+            error: function() {
+                console.log("Failed to fetch the overall total.");
+            }
+        });
+    }
+
+    // Fetch the total every 5 seconds
+    setInterval(fetchOverallTotal, 5000);
+
+    // Fetch immediately on page load
+    $(document).ready(fetchOverallTotal);
 </script>
 
 
