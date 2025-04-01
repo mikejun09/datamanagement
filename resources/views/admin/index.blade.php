@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-center align-items-center" >
     <div class="card text-center p-5">
         <h2>Overall Tagged Voters:</h2>
-        <h1 id="overallTotal">{{ $overallTotal }}</h1>
+        <h1 id="overallTotal" style="font-size: 75px;">{{ $overallTotal }}</h1>
     </div>
 </div>
 
