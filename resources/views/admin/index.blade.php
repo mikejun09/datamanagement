@@ -4,11 +4,13 @@
 
 <div class="col mt-5">
 
-    <div class="row">
-        <div class="card">
-            Overall Tagged Voters: <span id="overallTotal">{{ $overallTotal }}</span>
-        </div>
+<div class="d-flex justify-content-center align-items-center" >
+    <div class="card text-center p-5">
+        <h2>Overall Tagged Voters:</h2>
+        <h1 id="overallTotal">{{ $overallTotal }}</h1>
     </div>
+</div>
+
 
     <div class="row">
 
