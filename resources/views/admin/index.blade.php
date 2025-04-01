@@ -99,7 +99,7 @@
         });
     });
 </script>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Auto-refresh every 5 seconds (5000 milliseconds)
     function fetchOverallTotal() {
