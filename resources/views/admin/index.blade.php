@@ -3,6 +3,13 @@
 @section('content')
 
 <div class="col mt-5">
+
+    <div class="row">
+        <div class="card">
+            Overall Tagged Voters: {{ $overallTotal }}
+        </div>
+    </div>
+
     <div class="row">
 
         @foreach ($barangays as $barangay)
