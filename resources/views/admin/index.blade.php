@@ -23,10 +23,15 @@
                     <h5 class="card-title">{{ $barangay->barangay }}</h5>
                     <div class="d-flex align-items-center">
                         <div class="ps-3">
-                            <h1>{{ $barangay->tagged_voters_count }}</h1>
+                        <h1>
+                            {{ $barangay->tagged_voters_count }} 
+                             / 
+                            {{ $barangay->untagged_voters_count }} 
+                            
+                        </h1>
                         </div>
                     </div>
-                </div>
+                </div>  
             </div>
         </div>
         @endforeach

@@ -15,27 +15,35 @@ use Illuminate\Support\Facades\Log;
 class AdminController extends Controller
 {
     public function index(Request $request)
-    {
-        
-        $barangays = Barangay::all()->map(function ($barangay) {
-            $taggedVotersCount = MasterList::where('barangay', $barangay->barangay)
-                ->whereHas('coordinator')->count() + 
-                MasterList::where('barangay', $barangay->barangay)
-                ->whereHas('purokLeader')->count() +
-                MasterList::where('barangay', $barangay->barangay)
-                ->whereHas('householdLeader')->count() + 
-                MasterList::where('barangay', $barangay->barangay)
-                ->whereHas('householdMember')->count();
-    
-            $barangay->tagged_voters_count = $taggedVotersCount;
-            return $barangay;
-        });
+{
+    $barangays = Barangay::all()->map(function ($barangay) {
+        $taggedVotersCount = MasterList::where('barangay', $barangay->barangay)
+            ->where(function ($query) {
+                $query->whereHas('coordinator')
+                    ->orWhereHas('purokLeader')
+                    ->orWhereHas('householdLeader')
+                    ->orWhereHas('householdMember');
+            })->count();
 
+        $untaggedVotersCount = MasterList::where('barangay', $barangay->barangay)
+            ->whereDoesntHave('coordinator')
+            ->whereDoesntHave('purokLeader')
+            ->whereDoesntHave('householdLeader')
+            ->whereDoesntHave('householdMember')
+            ->count();
 
-        $overallTotal = $barangays->sum('tagged_voters_count');
-            
-        return view('admin.index', compact('barangays', 'overallTotal'));
-    }
+        $barangay->tagged_voters_count = $taggedVotersCount;
+        $barangay->untagged_voters_count = $untaggedVotersCount;
+
+        return $barangay;
+    });
+
+    $overallTotal = $barangays->sum('tagged_voters_count');
+    $overallUntaggedTotal = $barangays->sum('untagged_voters_count');
+
+    return view('admin.index', compact('barangays', 'overallTotal', 'overallUntaggedTotal'));
+}
+
 
     public function getVoters($barangay)
 {
