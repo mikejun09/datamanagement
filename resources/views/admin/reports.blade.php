@@ -49,16 +49,28 @@
                     @foreach($householdLeaders as $householdLeader)
                         <div class="mt-3">
                             <h5>Household Leader: 
-                                {{ $householdLeader->voter->first_name }} {{ $householdLeader->voter->last_name }}
+                                {{ $householdLeader->voter->first_name }} {{ $householdLeader->voter->last_name }} | {{ $householdLeader->voter->address }} | {{ $householdLeader->voter->barangay }}  |  {{ $householdLeader->voter->precinct }}
                             </h5>
 
                             <h6>Members:</h6>
-                            <ul style="list-style-type: none; padding: 0;">
-                    @foreach($householdLeader->householdMembers as $index => $householdMember)
-                        <li>{{ $index + 1 }}. {{ $householdMember->voter->first_name }} {{ $householdMember->voter->last_name }}</li>
-                    @endforeach
-                </ul>
 
+                            <table>
+                            <ul style="list-style-type: none; padding: 0;">
+                            @foreach($householdLeader->householdMembers as $index => $householdMember)
+                                <tr>
+                                    
+                                <td style=" width: 10%; "> {{ $index + 1 }}.</td>
+                                <td style=" width: 25%; ">{{ $householdMember->voter->last_name }}, {{ $householdMember->voter->first_name }} {{ $householdMember->voter->middle_name }}</td>
+                                <td style=" width: 15%; ">{{ $householdMember->voter->address }}</td>
+                                <td style=" width: 20%; ">{{ $householdMember->voter->barangay }}</td>
+                                <td style=" width: 20%; ">{{ $householdMember->voter->precinct }}</td>
+
+                                </tr>
+                                @endforeach
+                                </ul>
+                            </table>
+
+                         
 
                         </div>
                     @endforeach

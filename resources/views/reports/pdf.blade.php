@@ -26,11 +26,21 @@
                 <h5>Household Leader: {{ $householdLeader->voter->first_name }} {{ $householdLeader->voter->last_name }}</h5>
                 
                 <h6>Members:</h6>
-                <ul>
-                    @foreach($householdLeader->householdMembers as $index => $householdMember)
-                        <li>{{ $index + 1 }}. {{ $householdMember->voter->first_name }} {{ $householdMember->voter->last_name }}</li>
-                    @endforeach
-                </ul>
+                <table>
+                            
+                            @foreach($householdLeader->householdMembers as $index => $householdMember)
+                                <tr>
+                                    
+                                <td style=" width: 10px; "> {{ $index + 1 }}.</td>
+                                <td style=" width: 300px; ">{{ $householdMember->voter->last_name }}, {{ $householdMember->voter->first_name }} {{ $householdMember->voter->middle_name }}</td>
+                                <td style=" width: 80px; ">{{ $householdMember->voter->address }}</td>
+                                <td style=" width: 120px; ">{{ $householdMember->voter->barangay }}</td>
+                                <td style=" width: 80px; ">{{ $householdMember->voter->precinct }}</td>
+
+                                </tr>
+                                @endforeach
+                                
+                            </table>
             @endforeach
         @endforeach
     @else
