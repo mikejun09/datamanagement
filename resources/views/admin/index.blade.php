@@ -35,34 +35,30 @@
 
 
             <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const barangayCards = document.querySelectorAll('.barangay-card');
-                    let overallTotal = 0;
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/admin/all-barangay-counts")
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to fetch all barangay counts");
+                return response.json();
+            })
+            .then(data => {
+                // Update each barangay card
+                for (const [barangay, counts] of Object.entries(data.barangays)) {
+                    const element = document.getElementById(`count-${barangay}`);
+                    if (element) {
+                        element.textContent = `${counts.tagged} / ${counts.untagged}`;
+                    }
+                }
 
-                    barangayCards.forEach(card => {
-                        const barangay = card.getAttribute('data-id');
-                        const encodedBarangay = encodeURIComponent(barangay);
-                        const displayElement = document.getElementById(`count-${barangay}`);
+                // Update overall total
+                document.getElementById('overallTotal').textContent = data.overall_tagged;
+            })
+            .catch(error => {
+                console.error("Failed to load barangay data:", error);
+            });
+    });
+</script>
 
-                        fetch(`/admin/count-voters/${encodedBarangay}`)
-                            .then(response => {
-                                if (!response.ok) throw new Error("Fetch failed");
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (displayElement && data.tagged_count !== undefined && data.untagged_count !== undefined) {
-                                    displayElement.textContent = `${data.tagged_count} / ${data.untagged_count}`;
-                                    overallTotal += data.tagged_count;
-                                    document.getElementById('overallTotal').textContent = overallTotal;
-                                }
-                            })
-                            .catch(error => {
-                                console.error(`Error fetching count for ${barangay}:`, error);
-                                if (displayElement) displayElement.textContent = 'Error';
-                            });
-                    });
-                });
-            </script>
 
 
 

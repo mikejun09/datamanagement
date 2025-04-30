@@ -37,6 +37,7 @@ Route::get('/admin/all-barangay-counts', [AdminController::class, 'getAllBaranga
 
 
 
+
 // count voters
 
 
