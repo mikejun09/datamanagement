@@ -27,32 +27,42 @@ class AdminController extends Controller
 public function getAllBarangayCounts()
 {
     try {
+        $tagged = MasterList::select('barangay')
+            ->where(function ($query) {
+                $query->whereHas('coordinator')
+                    ->orWhereHas('purokLeader')
+                    ->orWhereHas('householdLeader')
+                    ->orWhereHas('householdMember');
+            })
+            ->groupBy('barangay')
+            ->selectRaw('barangay, COUNT(*) as tagged')
+            ->pluck('tagged', 'barangay');
+
+        $untagged = MasterList::select('barangay')
+            ->whereDoesntHave('coordinator')
+            ->whereDoesntHave('purokLeader')
+            ->whereDoesntHave('householdLeader')
+            ->whereDoesntHave('householdMember')
+            ->groupBy('barangay')
+            ->selectRaw('barangay, COUNT(*) as untagged')
+            ->pluck('untagged', 'barangay');
+
         $barangays = Barangay::pluck('barangay');
-
         $result = [];
-        foreach ($barangays as $brgy) {
-            $tagged = MasterList::where('barangay', $brgy)
-                ->where(function ($query) {
-                    $query->whereHas('coordinator')
-                        ->orWhereHas('purokLeader')
-                        ->orWhereHas('householdLeader')
-                        ->orWhereHas('householdMember');
-                })->count();
+        $overallTagged = 0;
 
-            $untagged = MasterList::where('barangay', $brgy)
-                ->whereDoesntHave('coordinator')
-                ->whereDoesntHave('purokLeader')
-                ->whereDoesntHave('householdLeader')
-                ->whereDoesntHave('householdMember')
-                ->count();
+        foreach ($barangays as $brgy) {
+            $taggedCount = $tagged[$brgy] ?? 0;
+            $untaggedCount = $untagged[$brgy] ?? 0;
 
             $result['barangays'][$brgy] = [
-                'tagged' => $tagged,
-                'untagged' => $untagged,
+                'tagged' => $taggedCount,
+                'untagged' => $untaggedCount,
             ];
+
+            $overallTagged += $taggedCount;
         }
 
-        $overallTagged = array_sum(array_column($result['barangays'], 'tagged'));
         $result['overall_tagged'] = $overallTagged;
 
         return response()->json($result);
@@ -60,6 +70,7 @@ public function getAllBarangayCounts()
         return response()->json(['error' => $e->getMessage()], 500);
     }
 }
+
 
 
 
