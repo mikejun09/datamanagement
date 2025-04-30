@@ -35,33 +35,35 @@
 
 
             <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                fetch("/admin/all-barangay-counts")
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.barangays) {
-                            Object.keys(data.barangays).forEach(barangay => {
-                                const countElem = document.getElementById(`count-${barangay}`);
-                                const info = data.barangays[barangay];
-                                if (countElem) {
-                                    countElem.textContent = `${info.tagged} / ${info.untagged}`;
-                                }
-                            });
-                        }
+                document.addEventListener("DOMContentLoaded", function () {
+                    const barangayCards = document.querySelectorAll('.barangay-card');
+                    let overallTotal = 0;
 
-                        // Set overall total
-                        if (data.overall_tagged !== undefined) {
-                            const totalElem = document.getElementById('overallTotal');
-                            if (totalElem) {
-                                totalElem.textContent = data.overall_tagged;
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Failed to load barangay data:', error);
+                    barangayCards.forEach(card => {
+                        const barangay = card.getAttribute('data-id');
+                        const encodedBarangay = encodeURIComponent(barangay);
+                        const displayElement = document.getElementById(`count-${barangay}`);
+
+                        fetch(`/admin/count-voters/${encodedBarangay}`)
+                            .then(response => {
+                                if (!response.ok) throw new Error("Fetch failed");
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (displayElement && data.tagged_count !== undefined && data.untagged_count !== undefined) {
+                                    displayElement.textContent = `${data.tagged_count} / ${data.untagged_count}`;
+                                    overallTotal += data.tagged_count;
+                                    document.getElementById('overallTotal').textContent = overallTotal;
+                                }
+                            })
+                            .catch(error => {
+                                console.error(`Error fetching count for ${barangay}:`, error);
+                                if (displayElement) displayElement.textContent = 'Error';
+                            });
                     });
-            });
+                });
             </script>
+
 
 
 
