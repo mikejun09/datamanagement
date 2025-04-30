@@ -7,34 +7,65 @@
 <div class="d-flex justify-content-center align-items-center" >
     <div class="card text-center p-5">
         <h2>Overall Tagged Voters:</h2>
-        <h1 id="overallTotal" style="font-size: 75px;">{{ $overallTotal }}</h1>
+        <h1 id="overallTotal" style="font-size: 75px;"></h1>
     </div>
 </div>
 
 
     <div class="row">
 
-        @foreach ($barangays as $barangay)
-        <div class="col-xxl-4 col-md-6">
-            <div class="card info-card sales-card barangay-card" 
-                data-id="{{ $barangay->barangay }}" 
-                style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ $barangay->barangay }}</h5>
-                    <div class="d-flex align-items-center">
-                        <div class="ps-3">
-                        <h1>
-                            {{ $barangay->tagged_voters_count }} 
-                             / 
-                            {{ $barangay->untagged_voters_count }} 
-                            
-                        </h1>
-                        </div>
+            @foreach ($barangays as $barangay)
+                <div class="col-xxl-4 col-md-6">
+                    <div class="card info-card sales-card barangay-card" 
+                        data-id="{{ $barangay->barangay }}" 
+                        style="cursor: pointer;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $barangay->barangay }}</h5>
+                            <div class="d-flex align-items-center">
+                                <div class="ps-3">
+                                <h1 id="count-{{ $barangay->barangay }}">
+                                    Loading...
+                                </h1>
+                                </div>
+                            </div>
+                        </div>  
                     </div>
-                </div>  
-            </div>
-        </div>
-        @endforeach
+                </div>
+            @endforeach
+
+
+            <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                fetch("/admin/all-barangay-counts")
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.barangays) {
+                            Object.keys(data.barangays).forEach(barangay => {
+                                const countElem = document.getElementById(`count-${barangay}`);
+                                const info = data.barangays[barangay];
+                                if (countElem) {
+                                    countElem.textContent = `${info.tagged} / ${info.untagged}`;
+                                }
+                            });
+                        }
+
+                        // Set overall total
+                        if (data.overall_tagged !== undefined) {
+                            const totalElem = document.getElementById('overallTotal');
+                            if (totalElem) {
+                                totalElem.textContent = data.overall_tagged;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Failed to load barangay data:', error);
+                    });
+            });
+            </script>
+
+
+
+
 
     </div>
 </div>
@@ -68,66 +99,8 @@
 </div>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const cards = document.querySelectorAll('.barangay-card');
-        let dataTable = null;  // Store DataTable instance
 
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                const barangay = card.getAttribute('data-id');
 
-                // Show the modal
-                const modal = new bootstrap.Modal(document.getElementById('barangayModal'));
-                modal.show();
-
-                // Destroy existing DataTable instance if it exists
-                if (dataTable) {
-                    dataTable.destroy();
-                }
-
-                // Initialize DataTable with AJAX
-                dataTable = new DataTable('#voters-table', {
-                    ajax: `/get-voters/${barangay}`,
-                    processing: true,
-                    serverSide: false,
-                    columns: [
-                        { data: 'last_name' },
-                        { data: 'first_name' },
-                        { data: 'middle_name' },
-                        { data: 'status' }  // Added Status column
-                    ],
-                    language: {
-                        loadingRecords: "Loading voters...",
-                        emptyTable: "No tagged voters found."
-                    }
-                });
-            });
-        });
-    });
-</script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    // Auto-refresh every 5 seconds (5000 milliseconds)
-    function fetchOverallTotal() {
-        $.ajax({
-            url: "{{ url('/get-overall-total') }}",  // Route to fetch the total
-            method: "GET",
-            success: function(response) {
-                $('#overallTotal').text(response.overallTotal);  // Update the total
-            },
-            error: function() {
-                console.log("Failed to fetch the overall total.");
-            }
-        });
-    }
-
-    // Fetch the total every 5 seconds
-    setInterval(fetchOverallTotal, 5000);
-
-    // Fetch immediately on page load
-    $(document).ready(fetchOverallTotal);
-</script>
 
 
 

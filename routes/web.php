@@ -24,10 +24,22 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 // 🟢 Admin Routes (Protected)
+
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin_index', [AdminController::class, 'index'])->name('admin_index');
     Route::get('/get-voters/{barangay}', [AdminController::class, 'getVoters']);
+
+// count voters
+
+Route::get('/admin/all-barangay-counts', [AdminController::class, 'getAllBarangayCounts']);
+
+
+
+
+// count voters
+
+
 
 
     Route::get('/voters', [TaggingController::class, 'index'])->name('voters.index');
@@ -97,17 +109,6 @@ Route::get('/refresh-tagged-members', [HouseholdMemberController::class, 'refres
 
 Route::delete('/household-leader/{id}', [PageController::class, 'destroy'])->name('household-leader.destroy');
 
-
-Route::get('/get-overall-total', function () {
-    $overallTotal = MasterList::whereHas('coordinator')
-        ->orWhereHas('purokLeader')
-        ->orWhereHas('householdLeader')
-        ->orWhereHas('householdMember')
-        ->distinct('id')
-        ->count('id');
-
-    return response()->json(['overallTotal' => $overallTotal]);
-});
 
 
 });

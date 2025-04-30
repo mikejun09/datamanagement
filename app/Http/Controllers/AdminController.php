@@ -16,73 +16,54 @@ class AdminController extends Controller
 {
     public function index(Request $request)
 {
-    $barangays = Barangay::all()->map(function ($barangay) {
-        $taggedVotersCount = MasterList::where('barangay', $barangay->barangay)
-            ->where(function ($query) {
-                $query->whereHas('coordinator')
-                    ->orWhereHas('purokLeader')
-                    ->orWhereHas('householdLeader')
-                    ->orWhereHas('householdMember');
-            })->count();
+    // Get all barangays first
+    $barangays = Barangay::all();
 
-        $untaggedVotersCount = MasterList::where('barangay', $barangay->barangay)
-            ->whereDoesntHave('coordinator')
-            ->whereDoesntHave('purokLeader')
-            ->whereDoesntHave('householdLeader')
-            ->whereDoesntHave('householdMember')
-            ->count();
-
-        $barangay->tagged_voters_count = $taggedVotersCount;
-        $barangay->untagged_voters_count = $untaggedVotersCount;
-
-        return $barangay;
-    });
-
-    $overallTotal = $barangays->sum('tagged_voters_count');
-    $overallUntaggedTotal = $barangays->sum('untagged_voters_count');
-
-    return view('admin.index', compact('barangays', 'overallTotal', 'overallUntaggedTotal'));
+    return view('admin.index', compact('barangays'));
 }
 
 
-    public function getVoters($barangay)
+
+public function getAllBarangayCounts()
 {
-    $voters = MasterList::where('barangay', $barangay)
-        ->where(function ($query) {
-            $query->whereHas('coordinator')
-                  ->orWhereHas('purokLeader')
-                  ->orWhereHas('householdLeader')
-                  ->orWhereHas('householdMember');
-        })
-        ->get();
+    try {
+        $barangays = Barangay::pluck('barangay');
 
-    $votersWithStatus = $voters->map(function ($voter) {
-        $status = 'Unknown';
+        $result = [];
+        foreach ($barangays as $brgy) {
+            $tagged = MasterList::where('barangay', $brgy)
+                ->where(function ($query) {
+                    $query->whereHas('coordinator')
+                        ->orWhereHas('purokLeader')
+                        ->orWhereHas('householdLeader')
+                        ->orWhereHas('householdMember');
+                })->count();
 
-        if ($voter->coordinator()->exists()) {
-            $status = 'Coordinator';
-        } elseif ($voter->purokLeader()->exists()) {
-            $status = 'Purok Leader';
-        } elseif ($voter->householdLeader()->exists()) {
-            $status = 'Household Leader';
-        } elseif ($voter->householdMember()->exists()) {
-            $status = 'Household Member';
+            $untagged = MasterList::where('barangay', $brgy)
+                ->whereDoesntHave('coordinator')
+                ->whereDoesntHave('purokLeader')
+                ->whereDoesntHave('householdLeader')
+                ->whereDoesntHave('householdMember')
+                ->count();
+
+            $result['barangays'][$brgy] = [
+                'tagged' => $tagged,
+                'untagged' => $untagged,
+            ];
         }
 
-        return [
-            'last_name' => $voter->last_name,
-            'first_name' => $voter->first_name,
-            'middle_name' => $voter->middle_name,
-            'status' => $status
-        ];
-    });
+        $overallTagged = array_sum(array_column($result['barangays'], 'tagged'));
+        $result['overall_tagged'] = $overallTagged;
 
-    return response()->json(['data' => $votersWithStatus]);
+        return response()->json($result);
+    } catch (\Throwable $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
 }
 
-    
 
-    
+
+  
 
 public function search(Request $request)
 {
