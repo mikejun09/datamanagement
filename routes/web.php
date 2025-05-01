@@ -32,7 +32,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 // count voters
 
-Route::get('/admin/all-barangay-counts', [AdminController::class, 'getAllBarangayCounts']);
+
+
+Route::get('/admin/count-voters/{barangay}', [AdminController::class, 'countVoters']);
+
+
 
 
 

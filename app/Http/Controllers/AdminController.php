@@ -22,54 +22,34 @@ class AdminController extends Controller
     return view('admin.index', compact('barangays'));
 }
 
-
-
-public function getAllBarangayCounts()
+public function countVoters($barangay)
 {
+
     try {
-        $tagged = MasterList::select('barangay')
+        // Count tagged voters in the given barangay
+        $tagged = MasterList::where('barangay', $barangay)
             ->where(function ($query) {
                 $query->whereHas('coordinator')
-                    ->orWhereHas('purokLeader')
-                    ->orWhereHas('householdLeader')
-                    ->orWhereHas('householdMember');
-            })
-            ->groupBy('barangay')
-            ->selectRaw('barangay, COUNT(*) as tagged')
-            ->pluck('tagged', 'barangay');
+                      ->orWhereHas('purokLeader')
+                      ->orWhereHas('householdLeader')
+                      ->orWhereHas('householdMember');
+            })->count();
 
-        $untagged = MasterList::select('barangay')
-            ->whereDoesntHave('coordinator')
-            ->whereDoesntHave('purokLeader')
-            ->whereDoesntHave('householdLeader')
-            ->whereDoesntHave('householdMember')
-            ->groupBy('barangay')
-            ->selectRaw('barangay, COUNT(*) as untagged')
-            ->pluck('untagged', 'barangay');
-
-        $barangays = Barangay::pluck('barangay');
-        $result = [];
-        $overallTagged = 0;
-
-        foreach ($barangays as $brgy) {
-            $taggedCount = $tagged[$brgy] ?? 0;
-            $untaggedCount = $untagged[$brgy] ?? 0;
-
-            $result['barangays'][$brgy] = [
-                'tagged' => $taggedCount,
-                'untagged' => $untaggedCount,
-            ];
-
-            $overallTagged += $taggedCount;
-        }
-
-        $result['overall_tagged'] = $overallTagged;
-
-        return response()->json($result);
+        return response()->json([
+            'barangay' => $barangay,
+            'tagged_count' => $tagged,
+        ]);
     } catch (\Throwable $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        return response()->json([
+            'error' => 'Failed to get data',
+            'message' => $e->getMessage(),
+        ], 500);
     }
 }
+
+
+
+
 
 
 

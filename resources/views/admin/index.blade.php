@@ -7,65 +7,299 @@
 <div class="d-flex justify-content-center align-items-center" >
     <div class="card text-center p-5">
         <h2>Overall Tagged Voters:</h2>
-        <h1 id="overallTotal" style="font-size: 75px;"></h1>
+        <h1 id="overallTotal" style="font-size: 75px;">20,383</h1>
     </div>
 </div>
 
-
     <div class="row">
 
-            @foreach ($barangays as $barangay)
-                <div class="col-xxl-4 col-md-6">
-                    <div class="card info-card sales-card barangay-card" 
-                        data-id="{{ $barangay->barangay }}" 
-                        style="cursor: pointer;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $barangay->barangay }}</h5>
-                            <div class="d-flex align-items-center">
-                                <div class="ps-3">
-                                <h1 id="count-{{ $barangay->barangay }}">
-                                    Loading...
-                                </h1>
-                                </div>
-                            </div>
-                        </div>  
+  
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> BUENAVISTA </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        822
+                        </h1>
+                      
                     </div>
                 </div>
-            @endforeach
+            </div>  
+        </div>
+    </div>
 
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> BALINTAD </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        504
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
 
-            <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch("/admin/all-barangay-counts")
-            .then(response => {
-                if (!response.ok) throw new Error("Failed to fetch all barangay counts");
-                return response.json();
-            })
-            .then(data => {
-                // Update each barangay card
-                for (const [barangay, counts] of Object.entries(data.barangays)) {
-                    const element = document.getElementById(`count-${barangay}`);
-                    if (element) {
-                        element.textContent = `${counts.tagged} / ${counts.untagged}`;
-                    }
-                }
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> DANATAG </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        1408
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
 
-                // Update overall total
-                document.getElementById('overallTotal').textContent = data.overall_tagged;
-            })
-            .catch(error => {
-                console.error("Failed to load barangay data:", error);
-            });
-    });
-</script>
+    </div>
 
+    <div class="row mt-2">
 
+  
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> IMBATUG </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        3119
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
 
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> KALILANGAN </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        710
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
 
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> LACOLAC </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        776
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    </div>
+
+    <div class="row mt-2">
+
+  
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> LANGAON </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        966
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> LIBORAN </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        1810
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> LINGATING </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        2338
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    </div>
+
+    <div class="row mt-2">
+
+  
+<div class="col-xxl-4 col-md-6">
+    <div class="card info-card sales-card barangay-card">
+        <div class="card-body">
+            <h5 class="card-title"> MABUHAY </h5>
+            <div class="d-flex align-items-center">
+                <div class="ps-3">
+                    <h1>
+                    1245
+                    </h1>
+                  
+                </div>
+            </div>
+        </div>  
+    </div>
+</div>
+
+<div class="col-xxl-4 col-md-6">
+    <div class="card info-card sales-card barangay-card">
+        <div class="card-body">
+            <h5 class="card-title"> MABUNGA </h5>
+            <div class="d-flex align-items-center">
+                <div class="ps-3">
+                    <h1>
+                    418
+                    </h1>
+                  
+                </div>
+            </div>
+        </div>  
+    </div>
+</div>
+
+<div class="col-xxl-4 col-md-6">
+    <div class="card info-card sales-card barangay-card">
+        <div class="card-body">
+            <h5 class="card-title"> NICDAO </h5>
+            <div class="d-flex align-items-center">
+                <div class="ps-3">
+                    <h1>
+                    801
+                    </h1>
+                  
+                </div>
+            </div>
+        </div>  
+    </div>
+</div>
+
+</div>
+
+<div class="row mt-2">
+
+  
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> PUALAS </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        1655
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> SALIMBALAN </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        2097
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> SAN MIGUEL </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        736
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    </div>
+
+    <div class="row mt-2">
+
+  
+    <div class="col-xxl-4 col-md-6">
+        <div class="card info-card sales-card barangay-card">
+            <div class="card-body">
+                <h5 class="card-title"> SAN VICENTE </h5>
+                <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                        <h1>
+                        978
+                        </h1>
+                      
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
 
 
 
     </div>
+
+
 </div>
 
 <!-- Modal -->
