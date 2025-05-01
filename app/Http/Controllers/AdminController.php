@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -142,12 +143,30 @@ public function create_user(Request $request){
 
 public function getOverallTaggedCount()
 {
-    $count = MasterList::where(function ($query) {
-        $query->whereHas('coordinator')
-              ->orWhereHas('purokLeader')
-              ->orWhereHas('householdLeader')
-              ->orWhereHas('householdMember');
-    })->count();
+    $count = DB::table('tbl_voterslist as v')
+        ->where(function ($query) {
+            $query->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('tbl_brgy_coordinator')
+                    ->whereColumn('coordinator_id', 'v.id');
+            })
+            ->orWhereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('tbl_brgy_purok_leader')
+                    ->whereColumn('purok_leader_id', 'v.id');
+            })
+            ->orWhereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('tbl_brgy_household_leader')
+                    ->whereColumn('household_leader_id', 'v.id');
+            })
+            ->orWhereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('tbl_brgy_household_member')
+                    ->whereColumn('household_member_id', 'v.id');
+            });
+        })
+        ->count();
 
     return response()->json(['count' => $count]);
 }
