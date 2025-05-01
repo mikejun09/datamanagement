@@ -33,10 +33,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // count voters
 
 
-
-Route::get('/admin/count-voters/{barangay}', [AdminController::class, 'countVoters']);
-
-
+Route::get('/barangay/tagged-count', [AdminController::class, 'getTaggedCount'])->name('barangay.tagged.count');
+Route::get('/overall-tagged-count', [AdminController::class, 'getOverallTaggedCount'])->name('overall.tagged.count');
 
 
 

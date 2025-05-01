@@ -114,4 +114,44 @@ public function create_user(Request $request){
         
     }
 
+
+    public function getTaggedCount(Request $request)
+{
+    $barangay = $request->input('barangay');
+
+    // Total in barangay
+    $total = MasterList::where('barangay', $barangay)->count();
+
+    // Tagged count
+    $tagged = MasterList::where('barangay', $barangay)
+        ->where(function ($query) {
+            $query->whereHas('coordinator')
+                  ->orWhereHas('purokLeader')
+                  ->orWhereHas('householdLeader')
+                  ->orWhereHas('householdMember');
+        })->count();
+
+    $untagged = $total - $tagged;
+
+    return response()->json([
+        'tagged' => $tagged,
+        'untagged' => $untagged
+    ]);
+}
+
+
+public function getOverallTaggedCount()
+{
+    $count = MasterList::where(function ($query) {
+        $query->whereHas('coordinator')
+              ->orWhereHas('purokLeader')
+              ->orWhereHas('householdLeader')
+              ->orWhereHas('householdMember');
+    })->count();
+
+    return response()->json(['count' => $count]);
+}
+
+
+
 }
