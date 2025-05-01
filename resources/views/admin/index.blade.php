@@ -21,7 +21,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        822
+                        822/0
                         </h1>
                       
                     </div>
@@ -37,7 +37,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        504
+                        504/0
                         </h1>
                       
                     </div>
@@ -53,7 +53,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        1408
+                        1408/469
                         </h1>
                       
                     </div>
@@ -74,7 +74,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        3119
+                        3119/2104
                         </h1>
                       
                     </div>
@@ -90,7 +90,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        710
+                        710/0
                         </h1>
                       
                     </div>
@@ -106,7 +106,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        776
+                        776/1
                         </h1>
                       
                     </div>
@@ -127,7 +127,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        966
+                        966/0
                         </h1>
                       
                     </div>
@@ -143,7 +143,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        1810
+                        1810/884
                         </h1>
                       
                     </div>
@@ -159,7 +159,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        2338
+                        2338/1163
                         </h1>
                       
                     </div>
@@ -180,7 +180,7 @@
             <div class="d-flex align-items-center">
                 <div class="ps-3">
                     <h1>
-                    1245
+                    1245/0
                     </h1>
                   
                 </div>
@@ -196,7 +196,7 @@
             <div class="d-flex align-items-center">
                 <div class="ps-3">
                     <h1>
-                    418
+                    418/617
                     </h1>
                   
                 </div>
@@ -212,7 +212,7 @@
             <div class="d-flex align-items-center">
                 <div class="ps-3">
                     <h1>
-                    801
+                    801/985
                     </h1>
                   
                 </div>
@@ -233,7 +233,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        1655
+                        1655/726
                         </h1>
                       
                     </div>
@@ -249,7 +249,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        2097
+                        2097/420
                         </h1>
                       
                     </div>
@@ -265,7 +265,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        736
+                        736/0
                         </h1>
                       
                     </div>
@@ -286,7 +286,7 @@
                 <div class="d-flex align-items-center">
                     <div class="ps-3">
                         <h1>
-                        978
+                        978/667
                         </h1>
                       
                     </div>
