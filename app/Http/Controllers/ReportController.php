@@ -9,6 +9,8 @@ use App\Models\Coordinator;
 use App\Models\PurokLeader;
 use App\Models\HouseholdLeader;
 use App\Models\HouseholdMember;
+use Dompdf\Options;
+use Barryvdh\DomPDF\Facade\Pdf as DomPDF;
 
 class ReportController extends Controller
 {
@@ -68,22 +70,36 @@ class ReportController extends Controller
 
 
             public function exportPDF(Request $request)
-    {
-        // Get session data
-        $coordinator = session('selected_coordinator');
-        $purokLeaders = session('purokLeaders', collect());
-        $householdLeaders = session('householdLeaders', collect());
-
-        if (!$coordinator) {
-            return redirect()->back()->with('error', 'No coordinator selected for PDF.');
-        }
-
-        // Load the Blade template and pass data
-        $pdf = PDF::loadView('reports.pdf', compact('coordinator', 'purokLeaders', 'householdLeaders'));
-
-        return $pdf->stream('report.pdf'); // Display PDF in browser
-        // return $pdf->download('report.pdf'); // Uncomment this line to force download
-    }
+            {
+                // Get session data
+                $coordinator = session('selected_coordinator');
+                $purokLeaders = session('purokLeaders', collect());
+                $householdLeaders = session('householdLeaders', collect());
+            
+                if (!$coordinator) {
+                    return redirect()->back()->with('error', 'No coordinator selected for PDF.');
+                }
+            
+                // Set higher memory limit and execution time
+                ini_set('memory_limit', '512M');
+                ini_set('max_execution_time', 300);
+            
+                // Set Dompdf options
+                $options = new Options();
+                $options->set('defaultFont', 'Arial');              // Lightweight font
+                $options->set('isHtml5ParserEnabled', true);        // Better parsing
+                $options->set('isRemoteEnabled', true);             // Allow external CSS/images if needed
+            
+                $pdf = DomPDF::setOptions([
+                    'defaultFont' => 'Arial',
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true,
+                ])
+                ->loadView('reports.pdf', compact('coordinator', 'purokLeaders', 'householdLeaders'))
+                ->setPaper('A4', 'portrait');
+            
+            return $pdf->stream('report.pdf');
+            }
 
 
 }

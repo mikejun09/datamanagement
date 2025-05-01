@@ -47,13 +47,6 @@ public function countVoters($barangay)
     }
 }
 
-
-
-
-
-
-
-
   
 
 public function search(Request $request)
